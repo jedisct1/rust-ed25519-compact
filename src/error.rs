@@ -6,10 +6,16 @@ pub enum Error {
     SignatureMismatch,
     /// A weak public key was used.
     WeakPublicKey,
-    /// An invalid public key was used.
+    /// The public key is invalid.
     InvalidPublicKey,
-    /// The signature is not canonical.
-    NoncanonicalSignature,
+    /// The secret key is invalid.
+    InvalidSecretKey,
+    /// The signature is invalid.
+    InvalidSignature,
+    /// The seed doesn't have the expected length.
+    InvalidSeed,
+    /// The noise doesn't have the expected length.
+    InvalidNoise,
 }
 
 #[cfg(feature = "std")]
@@ -21,7 +27,10 @@ impl Display for Error {
             Error::SignatureMismatch => write!(f, "Signature doesn't verify"),
             Error::WeakPublicKey => write!(f, "Weak public key"),
             Error::InvalidPublicKey => write!(f, "Invalid public key"),
-            Error::NoncanonicalSignature => write!(f, "Non-canonical signature"),
+            Error::InvalidSecretKey => write!(f, "Invalid secret key"),
+            Error::InvalidSignature => write!(f, "Invalid signature"),
+            Error::InvalidSeed => write!(f, "Invalid seed length"),
+            Error::InvalidNoise => write!(f, "Invalid noise length"),
         }
     }
 }

@@ -15,6 +15,16 @@ impl PublicKey {
     pub fn new(pk: [u8; PublicKey::BYTES]) -> Self {
         PublicKey(pk)
     }
+
+    /// Creates a public key from a slice.
+    pub fn from_slice(pk: &[u8]) -> Result<Self, Error> {
+        let mut pk_ = [0u8; PublicKey::BYTES];
+        if pk.len() != pk_.len() {
+            return Err(Error::InvalidPublicKey);
+        }
+        pk_.copy_from_slice(pk);
+        Ok(PublicKey::new(pk_))
+    }
 }
 
 impl Deref for PublicKey {
@@ -37,6 +47,16 @@ impl SecretKey {
     /// Creates a secret key from raw bytes.
     pub fn new(sk: [u8; SecretKey::BYTES]) -> Self {
         SecretKey(sk)
+    }
+
+    /// Creates a secret key from a slice.
+    pub fn from_slice(sk: &[u8]) -> Result<Self, Error> {
+        let mut sk_ = [0u8; SecretKey::BYTES];
+        if sk.len() != sk_.len() {
+            return Err(Error::InvalidSecretKey);
+        }
+        sk_.copy_from_slice(sk);
+        Ok(SecretKey::new(sk_))
     }
 
     /// Returns the public counterpart of a secret key.
@@ -77,6 +97,16 @@ impl Signature {
     pub fn new(signature: [u8; Signature::BYTES]) -> Self {
         Signature(signature)
     }
+
+    /// Creates a signature key from a slice.
+    pub fn from_slice(signature: &[u8]) -> Result<Self, Error> {
+        let mut signature_ = [0u8; Signature::BYTES];
+        if signature.len() != signature_.len() {
+            return Err(Error::InvalidSignature);
+        }
+        signature_.copy_from_slice(signature);
+        Ok(Signature::new(signature_))
+    }
 }
 
 impl Deref for Signature {
@@ -98,6 +128,16 @@ impl Seed {
     /// Creates a seed from raw bytes.
     pub fn new(seed: [u8; Seed::BYTES]) -> Self {
         Seed(seed)
+    }
+
+    /// Creates a seed from a slice.
+    pub fn from_slice(seed: &[u8]) -> Result<Self, Error> {
+        let mut seed_ = [0u8; Seed::BYTES];
+        if seed.len() != seed_.len() {
+            return Err(Error::InvalidSeed);
+        }
+        seed_.copy_from_slice(seed);
+        Ok(Seed::new(seed_))
     }
 }
 
@@ -131,6 +171,16 @@ impl Noise {
     pub fn new(noise: [u8; Noise::BYTES]) -> Self {
         Noise(noise)
     }
+
+    /// Creates noise from a slice.
+    pub fn from_slice(noise: &[u8]) -> Result<Self, Error> {
+        let mut noise_ = [0u8; Noise::BYTES];
+        if noise.len() != noise_.len() {
+            return Err(Error::InvalidSeed);
+        }
+        noise_.copy_from_slice(noise);
+        Ok(Noise::new(noise_))
+    }
 }
 
 impl Deref for Noise {
@@ -157,7 +207,7 @@ impl PublicKey {
     pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
         let s = &signature[32..64];
         if check_lt_l(s) {
-            return Err(Error::NoncanonicalSignature);
+            return Err(Error::InvalidSignature);
         }
         if is_identity(self) || self.iter().fold(0, |acc, x| acc | x) == 0 {
             return Err(Error::WeakPublicKey);
@@ -247,9 +297,8 @@ impl SecretKey {
             feature = "self-verify"
         ))]
         {
-            let mut public_key_ = [0u8; PublicKey::BYTES];
-            public_key_.copy_from_slice(public_key);
-            PublicKey(public_key_)
+            PublicKey::from_slice(public_key)
+                .expect("Key length changed")
                 .verify(message, &signature)
                 .expect("Newly created signature cannot be verified");
         }
