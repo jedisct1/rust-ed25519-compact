@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-compact"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
 description = "A small, self-contained, wasm-friendly Ed25519 implementation"
@@ -12,9 +12,10 @@ categories = ["algorithms", "cryptography", "no-std", "wasm"]
 license = "ISC"
 
 [features]
-default = ["random"]
-self-verify = []
+default = ["random", "std"]
 random = ["getrandom"]
+self-verify = []
+std = []
 
 [dependencies]
 getrandom = { version = "0.1", optional = true }
