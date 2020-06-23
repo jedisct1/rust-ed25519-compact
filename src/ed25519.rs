@@ -151,6 +151,14 @@ impl Default for Seed {
     }
 }
 
+#[cfg(feature = "random")]
+impl Seed {
+    /// Generates a random seed.
+    pub fn generate() -> Self {
+        Seed::default()
+    }
+}
+
 impl Deref for Seed {
     type Target = [u8; Seed::BYTES];
 
@@ -199,6 +207,14 @@ impl Default for Noise {
         let mut noise = [0u8; Noise::BYTES];
         getrandom::getrandom(&mut noise).expect("RNG failure");
         Noise(noise)
+    }
+}
+
+#[cfg(feature = "random")]
+impl Noise {
+    /// Generates random noise.
+    pub fn generate() -> Self {
+        Noise::default()
     }
 }
 
