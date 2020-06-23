@@ -47,3 +47,4 @@ mod error;
 mod sha512;
 
 pub use ed25519::*;
+pub use error::*;
