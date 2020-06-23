@@ -2,10 +2,11 @@
 
 * Formally-verified Curve25519 field arithmetic
 * `no_std`-friendly
+* WebAssembly-friendly
+* Compute@Edge-friendly
 * Lightweight
 * Zero dependencies if randomness is provided by the application
 * Only one portable dependency (`getrandom`) if not
-* Can be compiled to WebAssembly/WASI
 * Safe and simple Rust interface
 
 ## [API documentation](https://docs.rs/ed25519-compact)
