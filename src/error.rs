@@ -12,7 +12,7 @@ pub enum Error {
     NoncanonicalSignature,
 }
 
-#[cfg(std)]
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 impl Display for Error {
