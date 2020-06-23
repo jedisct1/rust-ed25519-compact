@@ -12,9 +12,8 @@ categories = ["algorithms", "cryptography", "no-std", "wasm"]
 license = "ISC"
 
 [features]
-default = ["std", "random"]
+default = ["random"]
 self-verify = []
-std = []
 random = ["getrandom"]
 
 [dependencies]

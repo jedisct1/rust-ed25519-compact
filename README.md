@@ -46,5 +46,10 @@ key_pair
 
 // All these structures can be viewed as raw bytes simply by dereferencing them:
 let signature_as_bytes: &[u8] = signature.as_ref();
-println!("Signature as bytes: {:?}", signature_as_bytes;
+println!("Signature as bytes: {:?}", signature_as_bytes);
 ```
+
+## Cargo features
+
+* `self-verify`: after having computed a new signature, verify that is it valid. This is slower, but improves resilience against fault attacks. It is enabled by default on WebAssembly targets.
+* `random` (enabled by default): adds `Default` implementations to the `Seed` and `Noise` objects, in order to securely create random keys and noise.
