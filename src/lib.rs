@@ -30,7 +30,7 @@
 //! println!("Signature as bytes: {:?}", signature_as_bytes);
 //! ```
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
     clippy::needless_range_loop,
     clippy::many_single_char_names,
