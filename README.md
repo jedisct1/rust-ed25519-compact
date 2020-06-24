@@ -1,3 +1,5 @@
+![GitHub CI](https://github.com/jedisct1/rust-ed25519-compact/workflows/GitHub%20CI/badge.svg)
+
 # A compact Ed25519 implementation for Rust
 
 * Formally-verified Curve25519 field arithmetic
