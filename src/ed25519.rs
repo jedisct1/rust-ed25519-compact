@@ -323,6 +323,9 @@ impl SecretKey {
 }
 
 impl KeyPair {
+    /// Number of bytes in a key pair.
+    pub const BYTES: usize = SecretKey::BYTES;
+
     /// Generates a new key pair using a secret seed.
     pub fn from_seed(seed: Seed) -> KeyPair {
         if seed.iter().fold(0, |acc, x| acc | x) == 0 {
@@ -347,6 +350,22 @@ impl KeyPair {
             pk: PublicKey(public_key),
             sk: SecretKey(secret),
         }
+    }
+
+    /// Creates a key pair from a slice.
+    pub fn from_slice(bytes: &[u8]) -> Result<Self, Error> {
+        let sk = SecretKey::from_slice(&bytes)?;
+        let pk = sk.public_key();
+        Ok(KeyPair { pk, sk })
+    }
+}
+
+impl Deref for KeyPair {
+    type Target = [u8; KeyPair::BYTES];
+
+    /// Returns a key pair as bytes.
+    fn deref(&self) -> &Self::Target {
+        &self.sk
     }
 }
 
