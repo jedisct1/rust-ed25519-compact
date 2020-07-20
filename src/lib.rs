@@ -44,6 +44,7 @@
 //! Cargo features:
 //!
 //! * `self-verify`: after having computed a new signature, verify that is it valid. This is slower, but improves resilience against fault attacks. It is enabled by default on WebAssembly targets.
+//! * `serde`: adds `Deserialize` and `Serialize` implementations for `KeyPair`.
 //! * `std`: disables `no_std` compatibility in order to make errors implement the standard `Error` trait.
 //! * `random` (enabled by default): adds `Default` and `generate` implementations to the `Seed` and `Noise` objects, in order to securely create random keys and noise.
 
@@ -65,3 +66,6 @@ mod sha512;
 
 pub use ed25519::*;
 pub use error::*;
+
+#[cfg(feature = "serde")]
+mod deser;
