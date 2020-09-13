@@ -2,6 +2,7 @@ use super::curve25519::{ge_scalarmult_base, is_identity, sc_muladd, sc_reduce, G
 use super::error::Error;
 use super::sha512;
 use core::ops::Deref;
+use std::fmt;
 
 /// A public key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -86,8 +87,14 @@ pub struct KeyPair {
 }
 
 /// An Ed25519 signature.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Signature([u8; Signature::BYTES]);
+
+impl fmt::Debug for Signature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!("{:x?}", self))
+    }
+}
 
 impl AsRef<[u8]> for Signature {
     fn as_ref(&self) -> &[u8] {
