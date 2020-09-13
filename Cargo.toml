@@ -18,7 +18,7 @@ self-verify = []
 std = []
 
 [dependencies]
-getrandom = { version = "0.1", optional = true }
+getrandom = { version = "0.2", optional = true }
 
 [dev-dependencies]
-getrandom = "0.1"
+getrandom = "0.2"
