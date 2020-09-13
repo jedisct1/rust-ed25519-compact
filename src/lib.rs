@@ -63,5 +63,5 @@ mod ed25519;
 mod error;
 mod sha512;
 
-pub use ed25519::*;
-pub use error::*;
+pub use crate::ed25519::*;
+pub use crate::error::*;

@@ -86,16 +86,22 @@ pub struct KeyPair {
 }
 
 /// An Ed25519 signature.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Signature([u8; Signature::BYTES]);
+
+impl AsRef<[u8]> for Signature {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
 
 impl Signature {
     /// Number of raw bytes in a signature.
     pub const BYTES: usize = 64;
 
     /// Creates a signature from raw bytes.
-    pub fn new(signature: [u8; Signature::BYTES]) -> Self {
-        Signature(signature)
+    pub fn new(bytes: [u8; Signature::BYTES]) -> Self {
+        Signature(bytes)
     }
 
     /// Creates a signature key from a slice.
@@ -389,4 +395,35 @@ fn check_lt_l(s: &[u8]) -> bool {
         }
     }
     c == 0
+}
+
+#[cfg(feature = "traits")]
+mod ed25519_trait {
+    use super::{PublicKey, SecretKey, Signature};
+    use ::ed25519::signature as ed25519_trait;
+
+    impl ed25519_trait::Signature for Signature {
+        fn from_bytes(bytes: &[u8]) -> Result<Self, ed25519_trait::Error> {
+            let mut bytes_ = [0u8; Signature::BYTES];
+            bytes_.copy_from_slice(bytes);
+            Ok(Signature::new(bytes_))
+        }
+    }
+
+    impl ed25519_trait::Signer<Signature> for SecretKey {
+        fn try_sign(&self, message: &[u8]) -> Result<Signature, ed25519_trait::Error> {
+            Ok(self.sign(message, None))
+        }
+    }
+
+    impl ed25519_trait::Verifier<Signature> for PublicKey {
+        fn verify(
+            &self,
+            message: &[u8],
+            signature: &Signature,
+        ) -> Result<(), ed25519_trait::Error> {
+            self.verify(message, signature)
+                .map_err(|e| ed25519_trait::Error::from_source(e))
+        }
+    }
 }
