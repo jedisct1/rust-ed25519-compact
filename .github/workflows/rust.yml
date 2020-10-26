@@ -20,5 +20,7 @@ jobs:
       run: cargo build --verbose
     - name: Build with nostd
       run: cargo build --verbose --no-default-features
+    - name: Build with extra features
+      run: cargo build --verbose --features='random,traits,self-verify'
     - name: Run tests
       run: cargo test --verbose
