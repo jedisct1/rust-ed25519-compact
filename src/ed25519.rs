@@ -1,8 +1,8 @@
 use super::curve25519::{ge_scalarmult_base, is_identity, sc_muladd, sc_reduce, GeP2, GeP3};
 use super::error::Error;
 use super::sha512;
+use core::fmt;
 use core::ops::Deref;
-use std::fmt;
 
 /// A public key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
