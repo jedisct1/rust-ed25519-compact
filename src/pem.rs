@@ -1,0 +1,113 @@
+use crate::{Error, KeyPair, PublicKey, SecretKey, Seed};
+#[cfg(feature = "std")]
+use ct_codecs::Encoder;
+use ct_codecs::{Base64, Decoder};
+
+const DER_HEADER_SK: [u8; 16] = [48, 46, 2, 1, 0, 48, 5, 6, 3, 43, 101, 112, 4, 34, 4, 32];
+
+const DER_HEADER_PK: [u8; 12] = [48, 42, 48, 5, 6, 3, 43, 101, 112, 3, 33, 0];
+
+impl KeyPair {
+    /// Import a key pair from an OpenSSL-compatible PEM file.
+    pub fn from_pem(pem: &str) -> Result<Self, Error> {
+        let mut it = pem.split("-----BEGIN PRIVATE KEY-----");
+        let _ = it.next().ok_or(Error::ParseError)?;
+        let inner = it.next().ok_or(Error::ParseError)?;
+        let mut it = inner.split("-----END PRIVATE KEY-----");
+        let b64 = it.next().ok_or(Error::ParseError)?;
+        let _ = it.next().ok_or(Error::ParseError)?;
+        let mut bin = [0u8; 16 + Seed::BYTES];
+        Base64::decode(&mut bin, &b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
+        if bin[0..16] != DER_HEADER_SK {
+            return Err(Error::ParseError);
+        }
+        let mut seed = [0u8; Seed::BYTES];
+        seed.copy_from_slice(&bin[16..]);
+        let kp = KeyPair::from_seed(Seed::new(seed));
+        Ok(kp)
+    }
+
+    /// Export a key pair as an OpenSSL-compatible PEM file.
+    #[cfg(feature = "std")]
+    pub fn to_pem(&self) -> String {
+        format!("{}\n{}\n", self.sk.to_pem().trim(), self.pk.to_pem().trim())
+    }
+}
+
+impl SecretKey {
+    /// Import a secret key from an OpenSSL-compatible PEM file.
+    pub fn from_pem(pem: &str) -> Result<Self, Error> {
+        let kp = KeyPair::from_pem(pem)?;
+        Ok(kp.sk)
+    }
+
+    /// Export a secret key as an OpenSSL-compatible PEM file.
+    #[cfg(feature = "std")]
+    pub fn to_pem(&self) -> String {
+        let mut bin = [0u8; 16 + Seed::BYTES];
+        bin[0..16].copy_from_slice(&DER_HEADER_SK);
+        bin[16..].copy_from_slice(self.seed().as_ref());
+        let b64 = Base64::encode_to_string(bin).unwrap();
+        format!(
+            "-----BEGIN PRIVATE KEY-----\n{}\n-----END PRIVATE KEY-----\n",
+            b64
+        )
+    }
+}
+
+impl PublicKey {
+    /// Import a public key from an OpenSSL-compatible PEM file.
+    pub fn from_pem(pem: &str) -> Result<Self, Error> {
+        let mut it = pem.split("-----BEGIN PUBLIC KEY-----");
+        let _ = it.next().ok_or(Error::ParseError)?;
+        let inner = it.next().ok_or(Error::ParseError)?;
+        let mut it = inner.split("-----END PUBLIC KEY-----");
+        let b64 = it.next().ok_or(Error::ParseError)?;
+        let _ = it.next().ok_or(Error::ParseError)?;
+        let mut bin = [0u8; 12 + PublicKey::BYTES];
+        Base64::decode(&mut bin, &b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
+        if bin[0..12] != DER_HEADER_PK {
+            return Err(Error::ParseError);
+        }
+        let mut pk = [0u8; PublicKey::BYTES];
+        pk.copy_from_slice(&bin[12..]);
+        let pk = PublicKey::new(pk);
+        Ok(pk)
+    }
+
+    /// Export a public key as an OpenSSL-compatible PEM file.
+    #[cfg(feature = "std")]
+    pub fn to_pem(&self) -> String {
+        let mut bin = [0u8; 12 + PublicKey::BYTES];
+        bin[0..12].copy_from_slice(&DER_HEADER_PK);
+        bin[12..].copy_from_slice(self.as_ref());
+        let b64 = Base64::encode_to_string(bin).unwrap();
+        format!(
+            "-----BEGIN PUBLIC KEY-----\n{}\n-----END PUBLIC KEY-----\n",
+            b64
+        )
+    }
+}
+
+#[test]
+fn test_pem() {
+    let sk_pem = "-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIMXY1NUbUe/3dW2YUoKW5evsnCJPMfj60/q0RzGne3gg
+-----END PRIVATE KEY-----\n";
+    let sk = SecretKey::from_pem(&sk_pem).unwrap();
+
+    let pk_pem = "-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAyrRjJfTnhMcW5igzYvPirFW5eUgMdKeClGzQhd4qw+Y=
+-----END PUBLIC KEY-----\n";
+    let pk = PublicKey::from_pem(&pk_pem).unwrap();
+
+    assert_eq!(sk.public_key(), pk);
+
+    #[cfg(features = "std")]
+    {
+        let sk_pem2 = sk.to_pem();
+        let pk_pem2 = pk.to_pem();
+        assert_eq!(sk_pem, sk_pem2);
+        assert_eq!(pk_pem, pk_pem2);
+    }
+}
