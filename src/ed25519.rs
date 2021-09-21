@@ -374,7 +374,7 @@ impl KeyPair {
 
     /// Creates a key pair from a slice.
     pub fn from_slice(bytes: &[u8]) -> Result<Self, Error> {
-        let sk = SecretKey::from_slice(&bytes)?;
+        let sk = SecretKey::from_slice(bytes)?;
         let pk = sk.public_key();
         Ok(KeyPair { pk, sk })
     }

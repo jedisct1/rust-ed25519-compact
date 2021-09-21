@@ -540,7 +540,7 @@ impl Fe {
     fn square(&self) -> Fe {
         let &Fe(f) = &self;
         let mut h = Fe::default();
-        fiat_25519_carry_square(&mut h.0, &f);
+        fiat_25519_carry_square(&mut h.0, f);
         h
     }
 
@@ -587,7 +587,7 @@ impl Fe {
     fn neg(&self) -> Fe {
         let &Fe(f) = &self;
         let mut h = Fe::default();
-        fiat_25519_opp(&mut h.0, &f);
+        fiat_25519_opp(&mut h.0, f);
         h
     }
 

@@ -284,7 +284,7 @@ impl State {
             w.G(&mut t, 3);
             w.expand();
             w.G(&mut t, 4);
-            t.add(&self);
+            t.add(self);
             self.0 = t.0;
             input = &input[128..];
             inlen -= 128;
