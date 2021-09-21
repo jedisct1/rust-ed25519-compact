@@ -63,8 +63,15 @@ impl SecretKey {
     /// Returns the public counterpart of a secret key.
     pub fn public_key(&self) -> PublicKey {
         let mut pk = [0u8; PublicKey::BYTES];
-        pk.copy_from_slice(&self[32..]);
+        pk.copy_from_slice(&self[Seed::BYTES..]);
         PublicKey(pk)
+    }
+
+    /// Returns the seed of a secret key.
+    pub fn seed(&self) -> Seed {
+        let mut seed = [0u8; Seed::BYTES];
+        seed.copy_from_slice(&self[0..Seed::BYTES]);
+        Seed(seed)
     }
 }
 
@@ -429,8 +436,17 @@ mod ed25519_trait {
             message: &[u8],
             signature: &Signature,
         ) -> Result<(), ed25519_trait::Error> {
-            self.verify(message, signature)
-                .map_err(|e| ed25519_trait::Error::from_source(e))
+            #[cfg(feature = "std")]
+            {
+                self.verify(message, signature)
+                    .map_err(|e| ed25519_trait::Error::from_source(e))
+            }
+
+            #[cfg(not(feature = "std"))]
+            {
+                self.verify(message, signature)
+                    .map_err(|_| ed25519_trait::Error::new())
+            }
         }
     }
 }

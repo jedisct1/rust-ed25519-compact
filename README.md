@@ -58,3 +58,4 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 * `std`: disables `no_std` compatibility in order to make errors implement the standard `Error` trait.
 * `random` (enabled by default): adds `Default` implementations to the `Seed` and `Noise` objects, in order to securely create random keys and noise.
 * `traits`: add support for the traits from the `ed25519` and `signature` crates.
+* `pem`: add support for importing/exporting keys as OpenSSL-compatible PEM files.

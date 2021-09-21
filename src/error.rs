@@ -16,6 +16,8 @@ pub enum Error {
     InvalidSeed,
     /// The noise doesn't have the expected length.
     InvalidNoise,
+    /// Parse error
+    ParseError,
 }
 
 #[cfg(feature = "std")]
@@ -31,6 +33,7 @@ impl Display for Error {
             Error::InvalidSignature => write!(f, "Invalid signature"),
             Error::InvalidSeed => write!(f, "Invalid seed length"),
             Error::InvalidNoise => write!(f, "Invalid noise length"),
+            Error::ParseError => write!(f, "Parse error"),
         }
     }
 }

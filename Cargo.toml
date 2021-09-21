@@ -13,12 +13,14 @@ license = "ISC"
 
 [features]
 default = ["random", "std"]
+pem = ["ct-codecs"]
 random = ["getrandom"]
 traits = ["ed25519"]
 self-verify = []
 std = []
 
 [dependencies]
+ct-codecs = { version = "1.1", optional = true}
 getrandom = { version = "0.2", optional = true }
 ed25519 = { version = "1.0", optional = true }
 

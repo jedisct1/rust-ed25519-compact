@@ -64,5 +64,8 @@ mod ed25519;
 mod error;
 mod sha512;
 
+#[cfg(feature = "pem")]
+mod pem;
+
 pub use crate::ed25519::*;
 pub use crate::error::*;
