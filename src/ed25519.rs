@@ -5,7 +5,7 @@ use core::fmt;
 use core::ops::Deref;
 
 /// A public key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PublicKey([u8; PublicKey::BYTES]);
 
 impl PublicKey {
@@ -38,7 +38,7 @@ impl Deref for PublicKey {
 }
 
 /// A secret key.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
 
 impl SecretKey {
@@ -85,7 +85,7 @@ impl Deref for SecretKey {
 }
 
 /// A key pair.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct KeyPair {
     /// Public key part of the key pair.
     pub pk: PublicKey,
@@ -94,7 +94,7 @@ pub struct KeyPair {
 }
 
 /// An Ed25519 signature.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Signature([u8; Signature::BYTES]);
 
 impl fmt::Debug for Signature {
@@ -139,6 +139,7 @@ impl Deref for Signature {
 }
 
 /// A seed, which a key pair can be derived from.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Seed([u8; Seed::BYTES]);
 
 impl Seed {
@@ -189,6 +190,7 @@ impl Deref for Seed {
 }
 
 /// Noise, for non-deterministic signatures.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Noise([u8; Noise::BYTES]);
 
 impl Noise {
