@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-compact"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
 description = "A small, self-contained, wasm-friendly Ed25519 implementation"
@@ -20,7 +20,7 @@ self-verify = []
 std = []
 
 [dependencies]
-ct-codecs = { version = "1.1", optional = true}
+ct-codecs = { version = "1.1", optional = true }
 getrandom = { version = "0.2", optional = true }
 ed25519 = { version = "1.2", optional = true }
 
