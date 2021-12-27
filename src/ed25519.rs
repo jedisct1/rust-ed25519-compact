@@ -465,7 +465,7 @@ fn test_ed25519() {
     let message = b"Hello, World!";
     let signature = kp.sk.sign(message, None);
     assert!(kp.pk.verify(message, &signature).is_ok());
-    assert!(!kp.pk.verify(b"Hello, world!", &signature).is_ok());
+    assert!(kp.pk.verify(b"Hello, world!", &signature).is_err());
     assert_eq!(
         signature.as_ref(),
         [
