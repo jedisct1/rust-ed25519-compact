@@ -810,11 +810,7 @@ impl GeP3 {
         let y_squared = y.square();
         let u = y_squared - FE_ONE;
         let v = (y_squared * FE_D) + FE_ONE;
-        let v_raise_3 = v.square() * v;
-        let v_raise_7 = v_raise_3.square() * v;
-        let uv7 = v_raise_7 * u; // Is this commutative? u comes second in the code, but not in the notation...
-
-        let mut x = uv7.pow25523() * v_raise_3 * u;
+        let mut x = (u * v).pow25523() * u;
 
         let vxx = x.square() * v;
         let check = vxx - u;
