@@ -99,7 +99,7 @@ pub struct Signature([u8; Signature::BYTES]);
 
 impl fmt::Debug for Signature {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{:x?}", self))
+        f.write_fmt(format_args!("{:x?}", &self.0))
     }
 }
 
