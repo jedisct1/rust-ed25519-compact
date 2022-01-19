@@ -17,6 +17,7 @@ pem = ["ct-codecs"]
 random = ["getrandom"]
 traits = ["ed25519"]
 self-verify = []
+blind-keys = []
 std = []
 
 [dependencies]

@@ -14,6 +14,8 @@ pub enum Error {
     InvalidSignature,
     /// The seed doesn't have the expected length.
     InvalidSeed,
+    /// The blind doesn't have the expected length.
+    InvalidBlind,
     /// The noise doesn't have the expected length.
     InvalidNoise,
     /// Parse error
@@ -32,6 +34,7 @@ impl Display for Error {
             Error::InvalidSecretKey => write!(f, "Invalid secret key"),
             Error::InvalidSignature => write!(f, "Invalid signature"),
             Error::InvalidSeed => write!(f, "Invalid seed length"),
+            Error::InvalidBlind => write!(f, "Invalid blind length"),
             Error::InvalidNoise => write!(f, "Invalid noise length"),
             Error::ParseError => write!(f, "Parse error"),
         }

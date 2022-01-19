@@ -634,7 +634,7 @@ pub struct GeP3 {
     t: Fe,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct GeP1P1 {
     x: Fe,
     y: Fe,
@@ -649,7 +649,7 @@ pub struct GePrecomp {
     xy2d: Fe,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct GeCached {
     y_plus_x: Fe,
     y_minus_x: Fe,
@@ -831,6 +831,16 @@ impl GeP3 {
         Some(GeP3 { x, y, z, t })
     }
 
+    #[cfg(feature = "blind-keys")]
+    pub fn from_bytes_vartime(s: &[u8; 32]) -> Option<GeP3> {
+        Self::from_bytes_negate_vartime(s).map(|p| GeP3 {
+            x: p.x.neg(),
+            y: p.y,
+            z: p.z,
+            t: p.t.neg(),
+        })
+    }
+
     fn to_p2(&self) -> GeP2 {
         GeP2 {
             x: self.x,
@@ -976,6 +986,20 @@ impl Sub<GePrecomp> for GeP3 {
     }
 }
 
+#[cfg(feature = "blind-keys")]
+pub fn ge_scalarmult(scalar: &[u8], q: &GeP3) -> GeP3 {
+    let mut q = *q;
+    let mut p = GeP3::zero();
+    for i in 0..256 {
+        let q_cached = q.to_cached();
+        let ps = (p + q_cached).to_p3();
+        q = (q + q_cached).to_p3();
+        let b = ((scalar[(i >> 3)] >> (i as u8 & 7)) & 1) as u8;
+        p.maybe_set(&ps, b);
+    }
+    p
+}
+
 pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
     const BXP: [u8; 32] = [
         0x1a, 0xd5, 0x25, 0x8f, 0x60, 0x2d, 0x56, 0xc9, 0xb2, 0xa7, 0x25, 0x95, 0x60, 0xc7, 0x2c,
@@ -1004,6 +1028,13 @@ pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
         p.maybe_set(&ps, b);
     }
     p
+}
+
+pub fn sc_reduce32(s: &mut [u8; 32]) {
+    let mut t = [0u8; 64];
+    t[0..32].copy_from_slice(s);
+    sc_reduce(&mut t);
+    s.copy_from_slice(&t[0..32]);
 }
 
 pub fn sc_reduce(s: &mut [u8]) {
@@ -1308,6 +1339,73 @@ pub fn sc_reduce(s: &mut [u8]) {
     s[29] = (s11 >> 1) as u8;
     s[30] = (s11 >> 9) as u8;
     s[31] = (s11 >> 17) as u8;
+}
+
+#[cfg(feature = "blind-keys")]
+pub fn sc_mul(a: &[u8], b: &[u8]) -> [u8; 32] {
+    let mut s = [0u8; 32];
+    sc_muladd(&mut s, a, b, &[0; 32]);
+    s
+}
+
+#[cfg(feature = "blind-keys")]
+pub fn sc_sq(s: &[u8]) -> [u8; 32] {
+    sc_mul(s, s)
+}
+
+#[cfg(feature = "blind-keys")]
+pub fn sc_sqmul(s: &[u8], n: usize, a: &[u8]) -> [u8; 32] {
+    let mut t = [0u8; 32];
+    t.copy_from_slice(s);
+    for _ in 0..n {
+        t = sc_sq(&t);
+    }
+    sc_mul(&t, a)
+}
+
+#[cfg(feature = "blind-keys")]
+pub fn sc_invert(s: &[u8; 32]) -> [u8; 32] {
+    let _10 = sc_sq(s);
+    let _11 = sc_mul(s, &_10);
+    let _100 = sc_mul(s, &_11);
+    let _1000 = sc_sq(&_100);
+    let _1010 = sc_mul(&_10, &_1000);
+    let _1011 = sc_mul(s, &_1010);
+    let _10000 = sc_sq(&_1000);
+    let _10110 = sc_sq(&_1011);
+    let _100000 = sc_mul(&_1010, &_10110);
+    let _100110 = sc_mul(&_10000, &_10110);
+    let _1000000 = sc_sq(&_100000);
+    let _1010000 = sc_mul(&_10000, &_1000000);
+    let _1010011 = sc_mul(&_11, &_1010000);
+    let _1100011 = sc_mul(&_10000, &_1010011);
+    let _1100111 = sc_mul(&_100, &_1100011);
+    let _1101011 = sc_mul(&_100, &_1100111);
+    let _10010011 = sc_mul(&_1000000, &_1010011);
+    let _10010111 = sc_mul(&_100, &_10010011);
+    let _10111101 = sc_mul(&_100110, &_10010111);
+    let _11010011 = sc_mul(&_10110, &_10111101);
+    let _11100111 = sc_mul(&_1010000, &_10010111);
+    let _11101011 = sc_mul(&_100, &_11100111);
+    let _11110101 = sc_mul(&_1010, &_11101011);
+
+    let mut recip = sc_mul(&_1011, &_11110101);
+    recip = sc_sqmul(&recip, 126, &_1010011);
+    recip = sc_sqmul(&recip, 9, &_10);
+    recip = sc_mul(&recip, &_11110101);
+    recip = sc_sqmul(&recip, 7, &_1100111);
+    recip = sc_sqmul(&recip, 9, &_11110101);
+    recip = sc_sqmul(&recip, 11, &_10111101);
+    recip = sc_sqmul(&recip, 8, &_11100111);
+    recip = sc_sqmul(&recip, 9, &_1101011);
+    recip = sc_sqmul(&recip, 6, &_1011);
+    recip = sc_sqmul(&recip, 14, &_10010011);
+    recip = sc_sqmul(&recip, 10, &_1100011);
+    recip = sc_sqmul(&recip, 9, &_10010111);
+    recip = sc_sqmul(&recip, 10, &_11110101);
+    recip = sc_sqmul(&recip, 8, &_11010011);
+    recip = sc_sqmul(&recip, 8, &_11101011);
+    recip
 }
 
 pub fn sc_muladd(s: &mut [u8], a: &[u8], b: &[u8], c: &[u8]) {
