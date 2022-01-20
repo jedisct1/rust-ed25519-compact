@@ -545,6 +545,15 @@ mod blind_keys {
     #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
     pub struct BlindPublicKey([u8; PublicKey::BYTES]);
 
+    impl Deref for BlindPublicKey {
+        type Target = [u8; BlindPublicKey::BYTES];
+
+        /// Returns a public key as bytes.
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+
     impl BlindPublicKey {
         /// Number of bytes in a blind public key.
         pub const BYTES: usize = PublicKey::BYTES;
@@ -569,7 +578,6 @@ mod blind_keys {
             let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
             let hash_output = sha512::Hash::hash(&blind[..]);
             let (blind_factor, _) = KeyPair::split(&hash_output, true);
-            dbg!("blind factor: {}", &blind_factor);
             let inverse = sc_invert(&blind_factor);
             Ok(PublicKey(ge_scalarmult(&inverse, &pk_p3).to_bytes()))
         }
@@ -697,6 +705,8 @@ pub use blind_keys::*;
 #[test]
 #[cfg(feature = "blind-keys")]
 fn test_blind_ed25519() {
+    use ct_codecs::{Decoder, Hex};
+
     let kp = KeyPair::from_seed([42u8; 32].into());
     let blind = Blind::new([69u8; 32]);
     let blind_kp = kp.blind(&blind);
@@ -705,4 +715,46 @@ fn test_blind_ed25519() {
     assert!(blind_kp.blind_pk.verify(message, &signature).is_ok());
     let recovered_pk = blind_kp.blind_pk.unblind(&blind).unwrap();
     assert!(recovered_pk == kp.pk);
+
+    let kp = KeyPair::from_seed(
+        Seed::from_slice(
+            &Hex::decode_to_vec(
+                "8c21b65abb8413cf12e5e723bde5337b07a257b5cc8893128a9b6837d3c92168",
+                None,
+            )
+            .unwrap(),
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        Hex::decode_to_vec(
+            "93f512c1fdc4bd2c35b42c5173822f1dc792dfda4df04518dbe8f6b4391ab612",
+            None
+        )
+        .unwrap(),
+        kp.pk.as_ref()
+    );
+
+    let blind = Blind::from_slice(
+        &Hex::decode_to_vec(
+            "e3e75045e670bbcd958401a9f892d963f0413a3594ee2b918be5d671701dc635",
+            None,
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let blind_kp = kp.blind(&blind);
+    assert_eq!(
+        Hex::decode_to_vec(
+            "becee23eba2f4eb01fd743f2ee5983cc0098f33ba54ea72bf40dcc218e8e3d96",
+            None
+        )
+        .unwrap(),
+        blind_kp.blind_pk.as_ref()
+    );
+
+    let message = Hex::decode_to_vec("68656c6c6f20776f726c64", None).unwrap();
+    let signature = blind_kp.blind_sk.sign(message, None);
+    assert_eq!(Hex::decode_to_vec("895a390a5de23f821b1379aacee8fc8fb5ced73c7482fac61d0b2859cc957a0f68a887e7539aa9d1d463f10ca119cab70a8c1763fd93fa425fe4da6976a8ae02",
+        None).unwrap(), signature.as_ref());
 }
