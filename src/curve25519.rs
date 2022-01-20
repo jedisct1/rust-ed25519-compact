@@ -657,6 +657,15 @@ pub struct GeCached {
     t2d: Fe,
 }
 
+impl GeCached {
+    pub fn maybe_set(&mut self, other: &GeCached, do_swap: u8) {
+        self.y_plus_x.maybe_set(&other.y_plus_x, do_swap);
+        self.y_minus_x.maybe_set(&other.y_minus_x, do_swap);
+        self.z.maybe_set(&other.z, do_swap);
+        self.t2d.maybe_set(&other.t2d, do_swap);
+    }
+}
+
 impl GeP1P1 {
     fn to_p2(&self) -> GeP2 {
         GeP2 {
@@ -879,13 +888,6 @@ impl GeP3 {
         bs[31] ^= (if x.is_negative() { 1 } else { 0 }) << 7;
         bs
     }
-
-    pub fn maybe_set(&mut self, other: &GeP3, do_swap: u8) {
-        self.x.maybe_set(&other.x, do_swap);
-        self.y.maybe_set(&other.y, do_swap);
-        self.z.maybe_set(&other.z, do_swap);
-        self.t.maybe_set(&other.t, do_swap);
-    }
 }
 
 impl Add<GeCached> for GeP3 {
@@ -986,18 +988,42 @@ impl Sub<GePrecomp> for GeP3 {
     }
 }
 
-#[cfg(feature = "blind-keys")]
-pub fn ge_scalarmult(scalar: &[u8], q: &GeP3) -> GeP3 {
-    let mut q = *q;
-    let mut p = GeP3::zero();
-    for i in 0..256 {
-        let q_cached = q.to_cached();
-        let ps = (p + q_cached).to_p3();
-        q = (q + q_cached).to_p3();
-        let b = ((scalar[(i >> 3)] >> (i as u8 & 7)) & 1) as u8;
-        p.maybe_set(&ps, b);
+fn ge_precompute(base: &GeP3) -> [GeCached; 16] {
+    let base_cached = base.to_cached();
+    let mut pc = [GeP3::zero(); 16];
+    pc[1] = *base;
+    for i in 2..16 {
+        pc[i] = if i % 2 == 0 {
+            pc[i / 2].dbl().to_p3()
+        } else {
+            pc[(i - 1)].add(base_cached).to_p3()
+        }
     }
-    p
+    let mut pc_cached: [GeCached; 16] = Default::default();
+    for i in 0..16 {
+        pc_cached[i] = pc[i].to_cached();
+    }
+    pc_cached
+}
+
+pub fn ge_scalarmult(scalar: &[u8], base: &GeP3) -> GeP3 {
+    let pc = ge_precompute(base);
+    let mut q = GeP3::zero();
+    let mut pos = 252;
+    loop {
+        let slot = ((scalar[pos >> 3] >> (pos & 7)) & 15) as usize;
+        let mut t = pc[0];
+        for i in 1..16 {
+            t.maybe_set(&pc[i], (((slot ^ i).wrapping_sub(1)) >> 8) as u8 & 1);
+        }
+        q = q.add(t).to_p3();
+        if pos == 0 {
+            break;
+        }
+        q = q.dbl().to_p3().dbl().to_p3().dbl().to_p3().dbl().to_p3();
+        pos -= 4;
+    }
+    q
 }
 
 pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
@@ -1013,21 +1039,13 @@ pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
     ];
     let bx = Fe::from_bytes(&BXP);
     let by = Fe::from_bytes(&BYP);
-    let mut q = GeP3 {
+    let base = GeP3 {
         x: bx,
         y: by,
         z: FE_ONE,
         t: bx * by,
     };
-    let mut p = GeP3::zero();
-    for i in 0..256 {
-        let q_cached = q.to_cached();
-        let ps = (p + q_cached).to_p3();
-        q = (q + q_cached).to_p3();
-        let b = ((scalar[(i >> 3)] >> (i as u8 & 7)) & 1) as u8;
-        p.maybe_set(&ps, b);
-    }
-    p
+    ge_scalarmult(scalar, &base)
 }
 
 pub fn sc_reduce32(s: &mut [u8; 32]) {
