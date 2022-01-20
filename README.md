@@ -44,7 +44,7 @@ key_pair
 // Verification of a different message using the same signature and public key fails.
 key_pair
     .pk
-    .verify(b"A differnt message", &signature)
+    .verify(b"A different message", &signature)
     .expect_err("Signature shouldn't verify");
 
 // All these structures can be viewed as raw bytes simply by dereferencing them:
