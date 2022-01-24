@@ -621,6 +621,14 @@ mod blind_keys {
     }
 
     impl BlindSecretKey {
+        /// Apply a mask to the signing prefix.
+        pub fn mask_signing_prefix(&mut self, mask: &[u8; 2 * Seed::BYTES]) {
+            self.prefix
+                .iter_mut()
+                .zip(mask.iter())
+                .for_each(|(a, b)| *a ^= *b);
+        }
+
         /// Computes a signature for the message `message` using the blind secret key.
         /// The noise parameter is optional, but recommended in order to mitigate fault attacks.
         pub fn sign(&self, message: impl AsRef<[u8]>, noise: Option<Noise>) -> Signature {
