@@ -75,6 +75,8 @@ mod sha512;
 
 #[cfg(feature = "pem")]
 mod pem;
+#[cfg(feature = "serde_support")]
+mod serde_support;
 
 pub use crate::ed25519::*;
 pub use crate::error::*;
