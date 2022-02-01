@@ -354,7 +354,7 @@ impl KeyPair {
         }
         let (scalar, _) = {
             let hash_output = sha512::Hash::hash(&seed[..]);
-            KeyPair::split(&hash_output, false)
+            KeyPair::split(&hash_output, false, true)
         };
         let pk = ge_scalarmult_base(&scalar).to_bytes();
         let mut sk = [0u8; 64];
@@ -379,10 +379,12 @@ impl KeyPair {
         scalar[31] |= 64;
     }
 
-    pub fn split(bytes: &[u8; 64], reduce: bool) -> ([u8; 32], [u8; 32]) {
+    pub fn split(bytes: &[u8; 64], reduce: bool, clamp: bool) -> ([u8; 32], [u8; 32]) {
         let mut scalar = [0u8; 32];
         scalar.copy_from_slice(&bytes[0..32]);
-        Self::clamp(&mut scalar);
+        if clamp {
+            Self::clamp(&mut scalar);
+        }
         if reduce {
             sc_reduce32(&mut scalar);
         }
@@ -577,7 +579,7 @@ mod blind_keys {
         pub fn unblind(&self, blind: &Blind) -> Result<PublicKey, Error> {
             let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
             let hash_output = sha512::Hash::hash(&blind[..]);
-            let (blind_factor, _) = KeyPair::split(&hash_output, true);
+            let (blind_factor, _) = KeyPair::split(&hash_output, true, false);
             let inverse = sc_invert(&blind_factor);
             Ok(PublicKey(ge_scalarmult(&inverse, &pk_p3).to_bytes()))
         }
@@ -671,12 +673,12 @@ mod blind_keys {
             let seed = self.sk.seed();
             let (scalar, prefix1) = {
                 let hash_output = sha512::Hash::hash(&seed[..]);
-                KeyPair::split(&hash_output, false)
+                KeyPair::split(&hash_output, false, true)
             };
 
             let (blind_factor, prefix2) = {
                 let hash_output = sha512::Hash::hash(&blind[..]);
-                KeyPair::split(&hash_output, true)
+                KeyPair::split(&hash_output, true, false)
             };
 
             let blind_scalar = sc_mul(&scalar, &blind_factor);
@@ -719,7 +721,7 @@ fn test_blind_ed25519() {
     let kp = KeyPair::from_seed(
         Seed::from_slice(
             &Hex::decode_to_vec(
-                "8c21b65abb8413cf12e5e723bde5337b07a257b5cc8893128a9b6837d3c92168",
+                "875532ab039b0a154161c284e19c74afa28d5bf5454e99284bbcffaa71eebf45",
                 None,
             )
             .unwrap(),
@@ -728,7 +730,7 @@ fn test_blind_ed25519() {
     );
     assert_eq!(
         Hex::decode_to_vec(
-            "93f512c1fdc4bd2c35b42c5173822f1dc792dfda4df04518dbe8f6b4391ab612",
+            "3b5983605b277cd44918410eb246bb52d83adfc806ccaa91a60b5b2011bc5973",
             None
         )
         .unwrap(),
@@ -737,7 +739,7 @@ fn test_blind_ed25519() {
 
     let blind = Blind::from_slice(
         &Hex::decode_to_vec(
-            "e3e75045e670bbcd958401a9f892d963f0413a3594ee2b918be5d671701dc635",
+            "c461e8595f0ac41d374f878613206704978115a226f60470ffd566e9e6ae73bf",
             None,
         )
         .unwrap(),
@@ -746,7 +748,7 @@ fn test_blind_ed25519() {
     let blind_kp = kp.blind(&blind);
     assert_eq!(
         Hex::decode_to_vec(
-            "becee23eba2f4eb01fd743f2ee5983cc0098f33ba54ea72bf40dcc218e8e3d96",
+            "e52bbb204e72a816854ac82c7e244e13a8fcc3217cfdeb90c8a5a927e741a20f",
             None
         )
         .unwrap(),
@@ -755,6 +757,6 @@ fn test_blind_ed25519() {
 
     let message = Hex::decode_to_vec("68656c6c6f20776f726c64", None).unwrap();
     let signature = blind_kp.blind_sk.sign(message, None);
-    assert_eq!(Hex::decode_to_vec("895a390a5de23f821b1379aacee8fc8fb5ced73c7482fac61d0b2859cc957a0f68a887e7539aa9d1d463f10ca119cab70a8c1763fd93fa425fe4da6976a8ae02",
+    assert_eq!(Hex::decode_to_vec("f35d2027f14250c07b3b353359362ec31e13076a547c749a981d0135fce067a361ad6522849e6ed9f61d93b0f76428129b9eb3f9c3cd0bfa1bc2a086a5eebd09",
         None).unwrap(), signature.as_ref());
 }
