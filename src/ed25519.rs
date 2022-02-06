@@ -347,6 +347,12 @@ impl KeyPair {
     /// Number of bytes in a key pair.
     pub const BYTES: usize = SecretKey::BYTES;
 
+    /// Generates a new key pair.
+    #[cfg(feature = "random")]
+    pub fn generate() -> KeyPair {
+        KeyPair::from_seed(Seed::default())
+    }
+
     /// Generates a new key pair using a secret seed.
     pub fn from_seed(seed: Seed) -> KeyPair {
         if seed.iter().fold(0, |acc, x| acc | x) == 0 {
@@ -709,7 +715,7 @@ pub use blind_keys::*;
 fn test_blind_ed25519() {
     use ct_codecs::{Decoder, Hex};
 
-    let kp = KeyPair::from_seed([42u8; 32].into());
+    let kp = KeyPair::generate();
     let blind = Blind::new([69u8; 32]);
     let blind_kp = kp.blind(&blind);
     let message = b"Hello, World!";
