@@ -673,6 +673,20 @@ mod blind_keys {
         }
     }
 
+    impl PublicKey {
+        /// Returns a blind version of the public key.
+        pub fn blind(&self, blind: &Blind) -> Result<BlindPublicKey, Error> {
+            let (blind_factor, _prefix2) = {
+                let hash_output = sha512::Hash::hash(&blind[..]);
+                KeyPair::split(&hash_output, true, false)
+            };
+            let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
+            Ok(BlindPublicKey(
+                ge_scalarmult(&blind_factor, &pk_p3).to_bytes(),
+            ))
+        }
+    }
+
     impl KeyPair {
         /// Returns a blind version of the key pair.
         pub fn blind(&self, blind: &Blind) -> BlindKeyPair {
