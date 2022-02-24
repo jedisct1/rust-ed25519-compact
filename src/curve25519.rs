@@ -8,7 +8,8 @@ pub type fiat_25519_u1 = u8;
 pub type fiat_25519_i1 = i8;
 pub type fiat_25519_i2 = i8;
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_addcarryx_u51(
     out1: &mut u64,
     out2: &mut fiat_25519_u1,
@@ -23,7 +24,8 @@ pub fn fiat_25519_addcarryx_u51(
     *out2 = x3;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_subborrowx_u51(
     out1: &mut u64,
     out2: &mut fiat_25519_u1,
@@ -39,7 +41,8 @@ pub fn fiat_25519_subborrowx_u51(
     *out2 = ((0x0_i8.wrapping_sub((x2 as fiat_25519_i2))) as fiat_25519_u1);
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_cmovznz_u64(out1: &mut u64, arg1: fiat_25519_u1, arg2: u64, arg3: u64) {
     let x1: fiat_25519_u1 = (!(!arg1));
     let x2: u64 = (((((0x0_i8.wrapping_sub((x1 as fiat_25519_i2))) as fiat_25519_i1) as i128)
@@ -48,7 +51,8 @@ pub fn fiat_25519_cmovznz_u64(out1: &mut u64, arg1: fiat_25519_u1, arg2: u64, ar
     *out1 = x3;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     let x1: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[4]).wrapping_mul(0x13)) as u128)));
     let x2: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[3]).wrapping_mul(0x13)) as u128)));
@@ -114,7 +118,8 @@ pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5
     out1[4] = x44;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_carry_square(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x1: u64 = ((arg1[4]).wrapping_mul(0x13));
     let x2: u64 = (x1.wrapping_mul(0x2));
@@ -173,7 +178,8 @@ pub fn fiat_25519_carry_square(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     out1[4] = x42;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_carry(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x1: u64 = (arg1[0]);
     let x2: u64 = ((x1 >> 51).wrapping_add((arg1[1])));
@@ -194,7 +200,8 @@ pub fn fiat_25519_carry(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     out1[4] = x12;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_add(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     let x1: u64 = ((arg1[0]).wrapping_add((arg2[0])));
     let x2: u64 = ((arg1[1]).wrapping_add((arg2[1])));
@@ -208,7 +215,8 @@ pub fn fiat_25519_add(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     out1[4] = x5;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_sub(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     let x1: u64 = ((0xfffffffffffdau64.wrapping_add((arg1[0]))).wrapping_sub((arg2[0])));
     let x2: u64 = ((0xffffffffffffeu64.wrapping_add((arg1[1]))).wrapping_sub((arg2[1])));
@@ -222,7 +230,8 @@ pub fn fiat_25519_sub(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     out1[4] = x5;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_opp(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x1: u64 = (0xfffffffffffdau64.wrapping_sub((arg1[0])));
     let x2: u64 = (0xffffffffffffeu64.wrapping_sub((arg1[1])));
@@ -236,7 +245,8 @@ pub fn fiat_25519_opp(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     out1[4] = x5;
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_selectznz(
     out1: &mut [u64; 5],
     arg1: fiat_25519_u1,
@@ -433,7 +443,8 @@ static FE_D2: Fe = Fe([
     633789495995903,
 ]);
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_8u(s: &[u8]) -> u64 {
     (s[0] as u64)
         | ((s[1] as u64) << 8)
@@ -445,22 +456,26 @@ fn load_8u(s: &[u8]) -> u64 {
         | ((s[7] as u64) << 56)
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_4u(s: &[u8]) -> u64 {
     (s[0] as u64) | ((s[1] as u64) << 8) | ((s[2] as u64) << 16) | ((s[3] as u64) << 24)
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_4i(s: &[u8]) -> i64 {
     load_4u(s) as i64
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_3u(s: &[u8]) -> u64 {
     (s[0] as u64) | ((s[1] as u64) << 8) | ((s[2] as u64) << 16)
 }
 
-#[inline]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_3i(s: &[u8]) -> i64 {
     load_3u(s) as i64
 }

@@ -10,7 +10,8 @@
     clippy::unreadable_literal
 )]
 
-#[inline(always)]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline(always))]
 fn load_be(base: &[u8], offset: usize) -> u64 {
     let addr = &base[offset..];
     (addr[7] as u64)
@@ -23,7 +24,8 @@ fn load_be(base: &[u8], offset: usize) -> u64 {
         | (addr[0] as u64) << 56
 }
 
-#[inline(always)]
+#[cfg_attr(feature = "opt_size", inline(never))]
+#[cfg_attr(not(feature = "opt_size"), inline(always))]
 fn store_be(base: &mut [u8], offset: usize, x: u64) {
     let addr = &mut base[offset..];
     addr[7] = x as u8;
@@ -50,37 +52,44 @@ impl W {
         W(w)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn Ch(x: u64, y: u64, z: u64) -> u64 {
         (x & y) ^ (!x & z)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn Maj(x: u64, y: u64, z: u64) -> u64 {
         (x & y) ^ (x & z) ^ (y & z)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn Sigma0(x: u64) -> u64 {
         x.rotate_right(28) ^ x.rotate_right(34) ^ x.rotate_right(39)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn Sigma1(x: u64) -> u64 {
         x.rotate_right(14) ^ x.rotate_right(18) ^ x.rotate_right(41)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sigma0(x: u64) -> u64 {
         x.rotate_right(1) ^ x.rotate_right(8) ^ (x >> 7)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sigma1(x: u64) -> u64 {
         x.rotate_right(19) ^ x.rotate_right(61) ^ (x >> 6)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn M(&mut self, a: usize, b: usize, c: usize, d: usize) {
         let w = &mut self.0;
         w[a] = w[a]
@@ -89,7 +98,8 @@ impl W {
             .wrapping_add(Self::sigma0(w[d]));
     }
 
-    #[inline]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn expand(&mut self) {
         self.M(0, (0 + 14) & 15, (0 + 9) & 15, (0 + 1) & 15);
         self.M(1, (1 + 14) & 15, (1 + 9) & 15, (1 + 1) & 15);
@@ -109,7 +119,8 @@ impl W {
         self.M(15, (15 + 14) & 15, (15 + 9) & 15, (15 + 1) & 15);
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn F(&mut self, state: &mut State, i: usize, k: u64) {
         let t = &mut state.0;
         t[(16 - i + 7) & 7] = t[(16 - i + 7) & 7]
@@ -250,7 +261,8 @@ impl State {
         State(t)
     }
 
-    #[inline(always)]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn add(&mut self, x: &State) {
         let sx = &mut self.0;
         let ex = &x.0;
