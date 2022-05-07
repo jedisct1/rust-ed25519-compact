@@ -779,7 +779,7 @@ impl GeP2 {
             y_minus_x: FE_ZERO,
             z: FE_ZERO,
             t2d: FE_ZERO,
-        }; 8]; /* A,3A,5A,7A,9A,11A,13A,15A */
+        }; 8]; // A,3A,5A,7A,9A,11A,13A,15A
         ai[0] = a_point.to_cached();
         let a2 = a_point.dbl().to_p3();
         ai[1] = (a2 + ai[0]).to_p3().to_cached();
