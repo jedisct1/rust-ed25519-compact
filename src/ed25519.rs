@@ -1,3 +1,6 @@
+use core::fmt;
+use core::ops::Deref;
+
 #[cfg(feature = "blind-keys")]
 use super::curve25519::{ge_scalarmult, sc_invert, sc_mul};
 use super::curve25519::{
@@ -5,8 +8,6 @@ use super::curve25519::{
 };
 use super::error::Error;
 use super::sha512;
-use core::fmt;
-use core::ops::Deref;
 
 /// A public key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -251,7 +252,8 @@ impl Noise {
 }
 
 impl PublicKey {
-    /// Verifies that the signature `signature` is valid for the message `message`.
+    /// Verifies that the signature `signature` is valid for the message
+    /// `message`.
     pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
         let s = &signature[32..64];
         if check_lt_l(s) {
@@ -291,7 +293,8 @@ impl PublicKey {
 
 impl SecretKey {
     /// Computes a signature for the message `message` using the secret key.
-    /// The noise parameter is optional, but recommended in order to mitigate fault attacks.
+    /// The noise parameter is optional, but recommended in order to mitigate
+    /// fault attacks.
     pub fn sign(&self, message: impl AsRef<[u8]>, noise: Option<Noise>) -> Signature {
         let seed = &self[0..32];
         let pk = &self[32..64];
@@ -433,8 +436,9 @@ fn check_lt_l(s: &[u8]) -> bool {
 
 #[cfg(feature = "traits")]
 mod ed25519_trait {
-    use super::{PublicKey, SecretKey, Signature};
     use ::ed25519::signature as ed25519_trait;
+
+    use super::{PublicKey, SecretKey, Signature};
 
     impl ed25519_trait::Signature for Signature {
         fn from_bytes(bytes: &[u8]) -> Result<Self, ed25519_trait::Error> {
@@ -590,7 +594,8 @@ mod blind_keys {
             Ok(PublicKey(ge_scalarmult(&inverse, &pk_p3).to_bytes()))
         }
 
-        /// Verifies that the signature `signature` is valid for the message `message`.
+        /// Verifies that the signature `signature` is valid for the message
+        /// `message`.
         pub fn verify(
             &self,
             message: impl AsRef<[u8]>,
@@ -629,8 +634,9 @@ mod blind_keys {
     }
 
     impl BlindSecretKey {
-        /// Computes a signature for the message `message` using the blind secret key.
-        /// The noise parameter is optional, but recommended in order to mitigate fault attacks.
+        /// Computes a signature for the message `message` using the blind
+        /// secret key. The noise parameter is optional, but recommended
+        /// in order to mitigate fault attacks.
         pub fn sign(&self, message: impl AsRef<[u8]>, noise: Option<Noise>) -> Signature {
             let nonce = {
                 let mut hasher = sha512::Hash::new();

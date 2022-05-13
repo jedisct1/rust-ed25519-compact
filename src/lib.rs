@@ -43,11 +43,18 @@
 //!
 //! Cargo features:
 //!
-//! * `self-verify`: after having computed a new signature, verify that is it valid. This is slower, but improves resilience against fault attacks. It is enabled by default on WebAssembly targets.
-//! * `std`: disables `no_std` compatibility in order to make errors implement the standard `Error` trait.
-//! * `random` (enabled by default): adds `Default` and `generate` implementations to the `Seed` and `Noise` objects, in order to securely create random keys and noise.
-//! * `traits`: add support for the traits from the ed25519 and signature crates.
-//! * `pem`: add support for importing/exporting keys as OpenSSL-compatible PEM files.
+//! * `self-verify`: after having computed a new signature, verify that is it
+//!   valid. This is slower, but improves resilience against fault attacks. It
+//!   is enabled by default on WebAssembly targets.
+//! * `std`: disables `no_std` compatibility in order to make errors implement
+//!   the standard `Error` trait.
+//! * `random` (enabled by default): adds `Default` and `generate`
+//!   implementations to the `Seed` and `Noise` objects, in order to securely
+//!   create random keys and noise.
+//! * `traits`: add support for the traits from the ed25519 and signature
+//!   crates.
+//! * `pem`: add support for importing/exporting keys as OpenSSL-compatible PEM
+//!   files.
 //! * `blind-keys`: add support for key blinding.
 
 #![cfg_attr(not(feature = "std"), no_std)]
