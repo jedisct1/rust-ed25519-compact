@@ -10,7 +10,7 @@ use super::error::Error;
 use super::sha512;
 
 /// A public key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct PublicKey([u8; PublicKey::BYTES]);
 
 impl PublicKey {
@@ -43,7 +43,7 @@ impl Deref for PublicKey {
 }
 
 /// A secret key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
 
 impl SecretKey {
@@ -90,7 +90,7 @@ impl Deref for SecretKey {
 }
 
 /// A key pair.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct KeyPair {
     /// Public key part of the key pair.
     pub pk: PublicKey,
@@ -99,7 +99,7 @@ pub struct KeyPair {
 }
 
 /// An Ed25519 signature.
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct Signature([u8; Signature::BYTES]);
 
 impl fmt::Debug for Signature {
