@@ -1,5 +1,5 @@
 use core::fmt;
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 
 #[cfg(feature = "blind-keys")]
 use super::curve25519::{ge_scalarmult, sc_invert, sc_mul};
@@ -86,6 +86,13 @@ impl Deref for SecretKey {
     /// Returns a secret key as bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for SecretKey {
+    /// Returns a secret key as mutable bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -197,6 +204,13 @@ impl Deref for Seed {
     /// Returns a seed as raw bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Seed {
+    /// Returns a seed as mutable raw bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
