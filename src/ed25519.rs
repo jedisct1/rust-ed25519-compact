@@ -600,9 +600,13 @@ mod blind_keys {
         }
 
         /// Unblinds a public key.
-        pub fn unblind(&self, blind: &Blind) -> Result<PublicKey, Error> {
+        pub fn unblind(&self, blind: &Blind, ctx: impl AsRef<[u8]>) -> Result<PublicKey, Error> {
             let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
-            let hash_output = sha512::Hash::hash(&blind[..]);
+            let mut hx = sha512::Hash::new();
+            hx.update(&blind[..]);
+            hx.update(&[0u8]);
+            hx.update(ctx.as_ref());
+            let hash_output = hx.finalize();
             let (blind_factor, _) = KeyPair::split(&hash_output, true, false);
             let inverse = sc_invert(&blind_factor);
             Ok(PublicKey(ge_scalarmult(&inverse, &pk_p3).to_bytes()))
@@ -695,9 +699,13 @@ mod blind_keys {
 
     impl PublicKey {
         /// Returns a blind version of the public key.
-        pub fn blind(&self, blind: &Blind) -> Result<BlindPublicKey, Error> {
+        pub fn blind(&self, blind: &Blind, ctx: impl AsRef<[u8]>) -> Result<BlindPublicKey, Error> {
             let (blind_factor, _prefix2) = {
-                let hash_output = sha512::Hash::hash(&blind[..]);
+                let mut hx = sha512::Hash::new();
+                hx.update(&blind[..]);
+                hx.update(&[0u8]);
+                hx.update(ctx.as_ref());
+                let hash_output = hx.finalize();
                 KeyPair::split(&hash_output, true, false)
             };
             let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
@@ -709,7 +717,7 @@ mod blind_keys {
 
     impl KeyPair {
         /// Returns a blind version of the key pair.
-        pub fn blind(&self, blind: &Blind) -> BlindKeyPair {
+        pub fn blind(&self, blind: &Blind, ctx: impl AsRef<[u8]>) -> BlindKeyPair {
             let seed = self.sk.seed();
             let (scalar, prefix1) = {
                 let hash_output = sha512::Hash::hash(&seed[..]);
@@ -717,7 +725,11 @@ mod blind_keys {
             };
 
             let (blind_factor, prefix2) = {
-                let hash_output = sha512::Hash::hash(&blind[..]);
+                let mut hx = sha512::Hash::new();
+                hx.update(&blind[..]);
+                hx.update(&[0u8]);
+                hx.update(ctx.as_ref());
+                let hash_output = hx.finalize();
                 KeyPair::split(&hash_output, true, false)
             };
 
@@ -751,11 +763,11 @@ fn test_blind_ed25519() {
 
     let kp = KeyPair::generate();
     let blind = Blind::new([69u8; 32]);
-    let blind_kp = kp.blind(&blind);
+    let blind_kp = kp.blind(&blind, "ctx");
     let message = b"Hello, World!";
     let signature = blind_kp.blind_sk.sign(message, None);
     assert!(blind_kp.blind_pk.verify(message, &signature).is_ok());
-    let recovered_pk = blind_kp.blind_pk.unblind(&blind).unwrap();
+    let recovered_pk = blind_kp.blind_pk.unblind(&blind, "ctx").unwrap();
     assert!(recovered_pk == kp.pk);
 
     let kp = KeyPair::from_seed(
@@ -785,10 +797,10 @@ fn test_blind_ed25519() {
         .unwrap(),
     )
     .unwrap();
-    let blind_kp = kp.blind(&blind);
+    let blind_kp = kp.blind(&blind, "ctx");
     assert_eq!(
         Hex::decode_to_vec(
-            "e52bbb204e72a816854ac82c7e244e13a8fcc3217cfdeb90c8a5a927e741a20f",
+            "246dcd43930b81d5e4d770db934a9fcd985b75fd014bc2a98b0aea02311c1836",
             None
         )
         .unwrap(),
@@ -797,6 +809,6 @@ fn test_blind_ed25519() {
 
     let message = Hex::decode_to_vec("68656c6c6f20776f726c64", None).unwrap();
     let signature = blind_kp.blind_sk.sign(message, None);
-    assert_eq!(Hex::decode_to_vec("f35d2027f14250c07b3b353359362ec31e13076a547c749a981d0135fce067a361ad6522849e6ed9f61d93b0f76428129b9eb3f9c3cd0bfa1bc2a086a5eebd09",
+    assert_eq!(Hex::decode_to_vec("947bacfabc63448f8955dc20630e069e58f37b72bb433ae17f2fa904ea860b44deb761705a3cc2168a6673ee0b41ff7765c7a4896941eec6833c1689315acb0b",
         None).unwrap(), signature.as_ref());
 }
