@@ -68,7 +68,7 @@
     clippy::suspicious_arithmetic_impl,
     clippy::identity_op
 )]
-mod curve25519;
+mod edwards25519;
 mod ed25519;
 mod error;
 mod field25519;

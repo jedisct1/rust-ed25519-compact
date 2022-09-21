@@ -2,8 +2,8 @@ use core::fmt;
 use core::ops::{Deref, DerefMut};
 
 #[cfg(feature = "blind-keys")]
-use super::curve25519::{ge_scalarmult, sc_invert, sc_mul};
-use super::curve25519::{
+use super::edwards25519::{ge_scalarmult, sc_invert, sc_mul};
+use super::edwards25519::{
     ge_scalarmult_base, is_identity, sc_muladd, sc_reduce, sc_reduce32, GeP2, GeP3,
 };
 use super::error::Error;
