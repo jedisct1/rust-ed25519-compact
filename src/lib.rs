@@ -68,11 +68,13 @@
     clippy::suspicious_arithmetic_impl,
     clippy::identity_op
 )]
-mod edwards25519;
 mod ed25519;
+mod edwards25519;
 mod error;
 mod field25519;
 mod sha512;
+
+pub mod x25519;
 
 #[cfg(feature = "pem")]
 mod pem;
