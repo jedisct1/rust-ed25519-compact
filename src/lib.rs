@@ -71,6 +71,7 @@
 mod curve25519;
 mod ed25519;
 mod error;
+mod field25519;
 mod sha512;
 
 #[cfg(feature = "pem")]
