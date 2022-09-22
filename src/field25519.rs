@@ -664,7 +664,7 @@ impl Fe {
             x = self.0[i] as u128 * sn + (x >> 51);
             fe.0[i] = (x as u64) & 0x7ffffffffffff;
         }
-        fe.0[0] += (x >> 51) as u64 & 19;
+        fe.0[0] += (x >> 51) as u64 * 19;
         fe
     }
 }

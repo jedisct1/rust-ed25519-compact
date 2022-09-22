@@ -25,7 +25,8 @@ impl PublicKey {
         Ok(PublicKey::new(pk_))
     }
 
-    /// Multiply a point by the cofactor, returning an error if the element is in a small-order group.
+    /// Multiply a point by the cofactor, returning an error if the element is
+    /// in a small-order group.
     pub fn clear_cofactor(&self) -> Result<Self, Error> {
         let cofactor = [
             8u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -34,13 +35,15 @@ impl PublicKey {
         self.ladder(&cofactor, 4)
     }
 
-    /// Multiply the point represented by the public key by the scalar after clamping it
-    pub fn clamped_mul(&self, sk: &SecretKey) -> Result<Self, Error> {
+    /// Multiply the point represented by the public key by the scalar after
+    /// clamping it
+    pub fn dh(&self, sk: &SecretKey) -> Result<Self, Error> {
         let sk = sk.clamped();
         self.ladder(&sk.0, 255)
     }
 
-    /// Multiply the point represented by the public key by the scalar WITHOUT CLAMPING
+    /// Multiply the point represented by the public key by the scalar WITHOUT
+    /// CLAMPING
     pub fn unclamped_mul(&self, sk: &SecretKey) -> Result<Self, Error> {
         self.clear_cofactor()?;
         self.ladder(&sk.0, 256)
@@ -55,7 +58,7 @@ impl PublicKey {
         let mut swap: u8 = 0;
         let mut pos = bits - 1;
         loop {
-            let bit = (s[pos >> 3] >> pos) & 1;
+            let bit = (s[pos >> 3] >> (pos & 7)) & 1;
             swap ^= bit;
             Fe::cswap2(&mut x2, &mut x3, &mut z2, &mut z3, swap);
             swap = bit;
@@ -67,7 +70,7 @@ impl PublicKey {
             let e = aa - bb;
             let da = (x3 - z3) * a;
             let cb = (x3 + z3) * b;
-            x3 = da + cb.square();
+            x3 = (da + cb).square();
             z3 = x1 * ((da - cb).square());
             z2 = e * (bb + (e.mul32(121666)));
             if pos == 0 {
@@ -82,6 +85,12 @@ impl PublicKey {
             return Err(Error::WeakPublicKey);
         }
         Ok(PublicKey(x2.to_bytes()))
+    }
+
+    /// Base point
+    #[inline]
+    pub fn base_point() -> PublicKey {
+        PublicKey(FE_CURVE25519_BASEPOINT.to_bytes())
     }
 }
 
@@ -129,7 +138,7 @@ impl SecretKey {
     /// Recover the public key
     pub fn recover_public_key(&self) -> Result<PublicKey, Error> {
         let sk = self.clamped();
-        PublicKey(FE_CURVE25519_BASEPOINT.to_bytes()).ladder(&sk.0, 255)
+        PublicKey::base_point().ladder(&sk.0, 255)
     }
 }
 
@@ -185,4 +194,20 @@ impl Deref for KeyPair {
     fn deref(&self) -> &Self::Target {
         &self.sk
     }
+}
+
+#[test]
+fn test_x25519() {
+    let kp_1 = SecretKey::from_slice(&[
+        1u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0,
+    ])
+    .unwrap();
+    let pk_1 = PublicKey::base_point().unclamped_mul(&kp_1).unwrap();
+    assert_eq!(pk_1, PublicKey::base_point());
+    let kp_a = KeyPair::generate();
+    let kp_b = KeyPair::generate();
+    let secret_a = kp_b.pk.dh(&kp_a.sk).unwrap();
+    let secret_b = kp_a.pk.dh(&kp_b.sk).unwrap();
+    assert_eq!(secret_a, secret_b);
 }
