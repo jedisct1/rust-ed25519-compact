@@ -12,7 +12,7 @@ categories = ["algorithms", "cryptography", "no-std", "wasm"]
 license = "ISC"
 
 [features]
-default = ["random", "std"]
+default = ["random", "std", "x25519"]
 pem = ["ct-codecs"]
 random = ["getrandom"]
 traits = ["ed25519"]
@@ -20,6 +20,7 @@ self-verify = []
 blind-keys = []
 std = []
 opt_size = []
+x25519 = []
 
 [dependencies]
 ct-codecs = { version = "1.1", optional = true }

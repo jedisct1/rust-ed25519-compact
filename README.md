@@ -61,3 +61,4 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 * `pem`: add support for importing/exporting keys as OpenSSL-compatible PEM files.
 * `blind-keys`: add support for key blinding.
 * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size reduction at the cost of 6.5-7% performance).
+* `x25519`: Enable support for the X25519 key exchange system.

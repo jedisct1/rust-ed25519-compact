@@ -87,7 +87,7 @@ impl PublicKey {
         Ok(PublicKey(x2.to_bytes()))
     }
 
-    /// Base point
+    /// The Curve25519 base point
     #[inline]
     pub fn base_point() -> PublicKey {
         PublicKey(FE_CURVE25519_BASEPOINT.to_bytes())

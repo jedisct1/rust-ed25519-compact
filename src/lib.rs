@@ -74,6 +74,7 @@ mod error;
 mod field25519;
 mod sha512;
 
+#[cfg(feature = "x25519")]
 pub mod x25519;
 
 #[cfg(feature = "pem")]
