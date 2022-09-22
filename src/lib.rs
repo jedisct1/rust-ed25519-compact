@@ -1,4 +1,4 @@
-//! A compact Ed25519 implementation for Rust.
+//! A compact Ed25519 and X25519 implementation for Rust.
 //!
 //! * Formally-verified Curve25519 field arithmetic
 //! * `no_std`-friendly
@@ -56,6 +56,11 @@
 //! * `pem`: add support for importing/exporting keys as OpenSSL-compatible PEM
 //!   files.
 //! * `blind-keys`: add support for key blinding.
+//! * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size
+//!   reduction at the cost of 6.5-7% performance).
+//! * `x25519`: Enable support for the X25519 key exchange system.
+//! * `signatures`: Enable support for signatures. Always required unless only
+//!   X25519 is used.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
@@ -68,11 +73,19 @@
     clippy::suspicious_arithmetic_impl,
     clippy::identity_op
 )]
-mod ed25519;
-mod edwards25519;
+
+mod common;
 mod error;
 mod field25519;
 mod sha512;
+
+pub use crate::common::*;
+pub use crate::error::*;
+
+#[cfg(feature = "signatures")]
+mod ed25519;
+#[cfg(feature = "signatures")]
+mod edwards25519;
 
 #[cfg(feature = "x25519")]
 pub mod x25519;
@@ -80,5 +93,5 @@ pub mod x25519;
 #[cfg(feature = "pem")]
 mod pem;
 
+#[cfg(feature = "signatures")]
 pub use crate::ed25519::*;
-pub use crate::error::*;

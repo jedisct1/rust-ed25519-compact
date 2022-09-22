@@ -442,6 +442,8 @@ pub(crate) static FE_D2: Fe = Fe([
     1815898335770999,
     633789495995903,
 ]);
+
+#[cfg(feature = "x25519")]
 pub(crate) static FE_CURVE25519_BASEPOINT: Fe = Fe([9, 0, 0, 0, 0]);
 
 #[cfg_attr(feature = "opt_size", inline(never))]
@@ -634,6 +636,7 @@ impl Fe {
         z_252_3
     }
 
+    #[cfg(feature = "x25519")]
     #[inline]
     pub fn cswap2(a0: &mut Fe, b0: &mut Fe, a1: &mut Fe, b1: &mut Fe, c: u8) {
         let mask: u64 = 0u64.wrapping_sub(c as _);
@@ -655,6 +658,7 @@ impl Fe {
         }
     }
 
+    #[cfg(feature = "x25519")]
     #[inline]
     pub fn mul32(&self, n: u32) -> Fe {
         let sn = n as u128;
