@@ -6,9 +6,35 @@ use crate::field25519::*;
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PublicKey([u8; PublicKey::BYTES]);
 
+static L: [u8; PublicKey::BYTES] = [
+    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x14, 0xde, 0xf9, 0xde, 0xa2, 0xf7, 0x9c, 0xd6, 0x58, 0x12, 0x63, 0x1a, 0x5c, 0xf5, 0xd3, 0xed,
+];
+
 impl PublicKey {
     /// Number of raw bytes in a public key.
     pub const BYTES: usize = 32;
+
+    fn reject_noncanonical_fe(s: &[u8]) -> Result<(), Error> {
+        let mut c: u8 = 0;
+        let mut n: u8 = 1;
+
+        let mut i = 31;
+        loop {
+            c |= ((((s[i] as i32) - (L[i] as i32)) >> 8) as u8) & n;
+            n &= ((((s[i] ^ L[i]) as i32) - 1) >> 8) as u8;
+            if i == 0 {
+                break;
+            } else {
+                i -= 1;
+            }
+        }
+        if c == 0 {
+            Ok(())
+        } else {
+            Err(Error::NonCanonical)
+        }
+    }
 
     /// Creates a public key from raw bytes.
     pub fn new(pk: [u8; PublicKey::BYTES]) -> Self {
@@ -21,6 +47,7 @@ impl PublicKey {
         if pk.len() != pk_.len() {
             return Err(Error::InvalidPublicKey);
         }
+        Self::reject_noncanonical_fe(pk)?;
         pk_.copy_from_slice(pk);
         Ok(PublicKey::new(pk_))
     }

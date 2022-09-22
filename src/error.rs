@@ -20,6 +20,8 @@ pub enum Error {
     InvalidNoise,
     /// Parse error
     ParseError,
+    /// Non-canonical encoding
+    NonCanonical,
 }
 
 #[cfg(feature = "std")]
@@ -37,6 +39,7 @@ impl Display for Error {
             Error::InvalidBlind => write!(f, "Invalid blind length"),
             Error::InvalidNoise => write!(f, "Invalid noise length"),
             Error::ParseError => write!(f, "Parse error"),
+            Error::NonCanonical => write!(f, "Non-canonical encoding"),
         }
     }
 }
