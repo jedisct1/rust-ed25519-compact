@@ -1,6 +1,7 @@
-use crate::field25519::*;
 use core::cmp::min;
 use core::ops::{Add, Sub};
+
+use crate::field25519::*;
 
 #[derive(Clone, Copy)]
 pub struct GeP2 {
