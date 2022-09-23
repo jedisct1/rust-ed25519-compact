@@ -9,7 +9,6 @@ use super::edwards25519::{
     GeP2, GeP3,
 };
 use super::error::Error;
-use super::field25519::*;
 use super::sha512;
 
 /// A public key.
@@ -157,7 +156,6 @@ impl PublicKey {
     pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
         let r = &signature[0..32];
         let s = &signature[32..64];
-        Fe::reject_noncanonical(r, true)?;
         sc_reject_noncanonical(s)?;
         if is_identity(self) || self.iter().fold(0, |acc, x| acc | x) == 0 {
             return Err(Error::WeakPublicKey);
