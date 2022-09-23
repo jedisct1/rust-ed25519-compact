@@ -1,7 +1,7 @@
 use core::ops::{Deref, DerefMut};
 
 use super::error::Error;
-use crate::field25519::*;
+use super::field25519::*;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PublicKey([u8; PublicKey::BYTES]);
@@ -21,7 +21,7 @@ impl PublicKey {
         if pk.len() != pk_.len() {
             return Err(Error::InvalidPublicKey);
         }
-        Fe::reject_noncanonical(pk)?;
+        Fe::reject_noncanonical(pk, false)?;
         pk_.copy_from_slice(pk);
         Ok(PublicKey::new(pk_))
     }

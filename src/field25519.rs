@@ -521,36 +521,7 @@ impl Mul for Fe {
     }
 }
 
-static L: [u8; 32] = [
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x14, 0xde, 0xf9, 0xde, 0xa2, 0xf7, 0x9c, 0xd6, 0x58, 0x12, 0x63, 0x1a, 0x5c, 0xf5, 0xd3, 0xed,
-];
-
 impl Fe {
-    pub fn reject_noncanonical(s: &[u8]) -> Result<(), Error> {
-        if s.len() != 32 {
-            panic!("Invalid compressed length")
-        }
-        let mut c: u8 = 0;
-        let mut n: u8 = 1;
-
-        let mut i = 31;
-        loop {
-            c |= ((((s[i] as i32) - (L[i] as i32)) >> 8) as u8) & n;
-            n &= ((((s[i] ^ L[i]) as i32) - 1) >> 8) as u8;
-            if i == 0 {
-                break;
-            } else {
-                i -= 1;
-            }
-        }
-        if c == 0 {
-            Ok(())
-        } else {
-            Err(Error::NonCanonical)
-        }
-    }
-
     pub fn from_bytes(s: &[u8]) -> Fe {
         if s.len() != 32 {
             panic!("Invalid compressed length")
@@ -701,5 +672,28 @@ impl Fe {
         }
         fe.0[0] += (x >> 51) as u64 * 19;
         fe
+    }
+
+    pub fn reject_noncanonical(s: &[u8], ignore_top_bit: bool) -> Result<(), Error> {
+        if s.len() != 32 {
+            panic!("Invalid compressed length")
+        }
+        let mut c = s[31];
+        if ignore_top_bit {
+            c &= 0x7f;
+        }
+        c ^= 0x7f;
+        let mut i: usize = 30;
+        while i > 0 {
+            c |= s[i] ^ 0xff;
+            i -= 1;
+        }
+        c = ((c as u16).wrapping_sub(1) >> 8) as u8;
+        let d = (((0xed - 1) as u16).wrapping_sub(s[0] as u16) >> 8) as u8;
+        if c & d & 1 == 0 {
+            Ok(())
+        } else {
+            Err(Error::NonCanonical)
+        }
     }
 }

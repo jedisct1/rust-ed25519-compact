@@ -5,9 +5,11 @@ use super::common::*;
 #[cfg(feature = "blind-keys")]
 use super::edwards25519::{ge_scalarmult, sc_invert, sc_mul};
 use super::edwards25519::{
-    ge_scalarmult_base, is_identity, sc_muladd, sc_reduce, sc_reduce32, GeP2, GeP3,
+    ge_scalarmult_base, is_identity, sc_muladd, sc_reduce, sc_reduce32, sc_reject_noncanonical,
+    GeP2, GeP3,
 };
 use super::error::Error;
+use super::field25519::*;
 use super::sha512;
 
 /// A public key.
@@ -153,10 +155,10 @@ impl PublicKey {
     /// Verifies that the signature `signature` is valid for the message
     /// `message`.
     pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
+        let r = &signature[0..32];
         let s = &signature[32..64];
-        if check_lt_l(s) {
-            return Err(Error::InvalidSignature);
-        }
+        Fe::reject_noncanonical(r, true)?;
+        sc_reject_noncanonical(s)?;
         if is_identity(self) || self.iter().fold(0, |acc, x| acc | x) == 0 {
             return Err(Error::WeakPublicKey);
         }
@@ -168,7 +170,7 @@ impl PublicKey {
         };
 
         let mut hasher = sha512::Hash::new();
-        hasher.update(&signature[0..32]);
+        hasher.update(r);
         hasher.update(&self[..]);
         hasher.update(message);
         let mut hash = hasher.finalize();
@@ -310,26 +312,55 @@ impl Deref for KeyPair {
     }
 }
 
-static L: [u8; 32] = [
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x14, 0xde, 0xf9, 0xde, 0xa2, 0xf7, 0x9c, 0xd6, 0x58, 0x12, 0x63, 0x1a, 0x5c, 0xf5, 0xd3, 0xed,
-];
+/// Noise, for non-deterministic signatures.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct Noise([u8; Noise::BYTES]);
 
-fn check_lt_l(s: &[u8]) -> bool {
-    let mut c: u8 = 0;
-    let mut n: u8 = 1;
+impl Noise {
+    /// Number of raw bytes for a noise component.
+    pub const BYTES: usize = 16;
 
-    let mut i = 31;
-    loop {
-        c |= ((((s[i] as i32) - (L[i] as i32)) >> 8) as u8) & n;
-        n &= ((((s[i] ^ L[i]) as i32) - 1) >> 8) as u8;
-        if i == 0 {
-            break;
-        } else {
-            i -= 1;
-        }
+    /// Creates a new noise component from raw bytes.
+    pub fn new(noise: [u8; Noise::BYTES]) -> Self {
+        Noise(noise)
     }
-    c == 0
+
+    /// Creates noise from a slice.
+    pub fn from_slice(noise: &[u8]) -> Result<Self, Error> {
+        let mut noise_ = [0u8; Noise::BYTES];
+        if noise.len() != noise_.len() {
+            return Err(Error::InvalidSeed);
+        }
+        noise_.copy_from_slice(noise);
+        Ok(Noise::new(noise_))
+    }
+}
+
+impl Deref for Noise {
+    type Target = [u8; Noise::BYTES];
+
+    /// Returns a noise as raw bytes.
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[cfg(feature = "random")]
+impl Default for Noise {
+    /// Generates random noise.
+    fn default() -> Self {
+        let mut noise = [0u8; Noise::BYTES];
+        getrandom::getrandom(&mut noise).expect("RNG failure");
+        Noise(noise)
+    }
+}
+
+#[cfg(feature = "random")]
+impl Noise {
+    /// Generates random noise.
+    pub fn generate() -> Self {
+        Noise::default()
+    }
 }
 
 #[cfg(feature = "traits")]

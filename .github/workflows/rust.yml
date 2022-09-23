@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: cargo test --verbose
     - name: Build with nostd
-      run: cargo test --verbose --no-default-features
+      run: cargo build --verbose --no-default-features
     - name: Build with extra features
       run: cargo test --verbose --features=pem,traits,self-verify,blind-keys,opt_size
     - name: Build without signatures
