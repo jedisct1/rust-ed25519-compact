@@ -62,4 +62,4 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 * `blind-keys`: add support for key blinding.
 * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size reduction at the cost of 6.5-7% performance).
 * `x25519`: Enable support for the X25519 key exchange system.
-* `signatures`: Enable support for signatures. Always required unless only X25519 is used.
+* `disable-signatures`: Disable support for signatures, and only compile support for X25519.

@@ -59,8 +59,8 @@
 //! * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size
 //!   reduction at the cost of 6.5-7% performance).
 //! * `x25519`: Enable support for the X25519 key exchange system.
-//! * `signatures`: Enable support for signatures. Always required unless only
-//!   X25519 is used.
+//! * `disable-signatures`: Disable support for signatures, and only compile
+//!   support for X25519.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
@@ -82,16 +82,17 @@ mod sha512;
 pub use crate::common::*;
 pub use crate::error::*;
 
-#[cfg(feature = "signatures")]
+#[cfg(not(feature = "disable-signatures"))]
 mod ed25519;
-#[cfg(feature = "signatures")]
+#[cfg(not(feature = "disable-signatures"))]
 mod edwards25519;
+
+#[cfg(not(feature = "disable-signatures"))]
+pub use crate::ed25519::*;
 
 #[cfg(feature = "x25519")]
 pub mod x25519;
 
+#[cfg(not(feature = "disable-signatures"))]
 #[cfg(feature = "pem")]
 mod pem;
-
-#[cfg(feature = "signatures")]
-pub use crate::ed25519::*;
