@@ -23,4 +23,4 @@ jobs:
     - name: Build with extra features
       run: cargo test --verbose --features=pem,traits,self-verify,blind-keys,opt_size
     - name: Build without signatures
-      run: cargo test --verbose --features=without-signatures
+      run: cargo build --verbose --features=disable-signatures
