@@ -21,7 +21,7 @@ impl PublicKey {
         if pk.len() != pk_.len() {
             return Err(Error::InvalidPublicKey);
         }
-        Fe::reject_noncanonical(pk, false)?;
+        Fe::reject_noncanonical(pk)?;
         pk_.copy_from_slice(pk);
         Ok(PublicKey::new(pk_))
     }

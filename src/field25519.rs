@@ -674,14 +674,11 @@ impl Fe {
         fe
     }
 
-    pub fn reject_noncanonical(s: &[u8], ignore_top_bit: bool) -> Result<(), Error> {
+    pub fn reject_noncanonical(s: &[u8]) -> Result<(), Error> {
         if s.len() != 32 {
             panic!("Invalid compressed length")
         }
         let mut c = s[31];
-        if ignore_top_bit {
-            c &= 0x7f;
-        }
         c ^= 0x7f;
         let mut i: usize = 30;
         while i > 0 {
