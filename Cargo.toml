@@ -9,7 +9,7 @@ keywords = ["crypto", "ed25519", "x25519", "eddsa", "signature"]
 repository = "https://github.com/jedisct1/rust-ed25519-compact"
 homepage = "https://github.com/jedisct1/rust-ed25519-compact"
 categories = ["algorithms", "cryptography", "no-std", "wasm"]
-license = "ISC"
+license = "MIT"
 
 [features]
 default = ["random", "std", "x25519"]
