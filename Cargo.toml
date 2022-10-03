@@ -12,7 +12,7 @@ categories = ["algorithms", "cryptography", "no-std", "wasm"]
 license = "MIT"
 
 [features]
-default = ["random", "std", "x25519"]
+default = ["random", "std", "x25519", "pem"]
 pem = ["ct-codecs"]
 random = ["getrandom"]
 traits = ["ed25519"]
