@@ -433,6 +433,14 @@ pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
     ge_scalarmult(scalar, &base)
 }
 
+#[cfg(feature = "x25519")]
+pub fn ge_to_x25519_vartime(s: &[u8; 32]) -> Option<[u8; 32]> {
+    let p = GeP3::from_bytes_vartime(s)?;
+    let yed = p.y;
+    let x_mont = (FE_ONE + yed) * ((FE_ONE - yed).invert());
+    Some(x_mont.to_bytes())
+}
+
 pub fn sc_reduce32(s: &mut [u8; 32]) {
     let mut t = [0u8; 64];
     t[0..32].copy_from_slice(s);
@@ -1510,11 +1518,3 @@ static BI: [GePrecomp; 8] = [
         ]),
     },
 ];
-
-#[cfg(feature = "x25519")]
-pub fn ge_to_x25519_vartime(s: &[u8; 32]) -> Option<[u8; 32]> {
-    let p = GeP3::from_bytes_vartime(s)?;
-    let yed = p.y;
-    let x_mont = (FE_ONE + yed) * ((FE_ONE - yed).invert());
-    Some(x_mont.to_bytes())
-}
