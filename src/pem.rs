@@ -29,7 +29,7 @@ impl KeyPair {
         let b64 = it.next().ok_or(Error::ParseError)?;
         let _ = it.next().ok_or(Error::ParseError)?;
         let mut der = [0u8; 16 + Seed::BYTES];
-        Base64::decode(&mut der, &b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
+        Base64::decode(&mut der, b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
         Self::from_der(&der)
     }
 
@@ -94,7 +94,7 @@ impl PublicKey {
         let b64 = it.next().ok_or(Error::ParseError)?;
         let _ = it.next().ok_or(Error::ParseError)?;
         let mut der = [0u8; 12 + PublicKey::BYTES];
-        Base64::decode(&mut der, &b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
+        Base64::decode(&mut der, b64, Some(b"\r\n\t ")).map_err(|_| Error::ParseError)?;
         Self::from_der(&der)
     }
 

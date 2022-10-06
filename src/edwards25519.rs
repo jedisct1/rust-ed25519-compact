@@ -225,7 +225,7 @@ impl GeP3 {
         Some(GeP3 { x, y, z, t })
     }
 
-    #[cfg(feature = "blind-keys")]
+    #[cfg(any(feature = "x25519", feature = "blind-keys"))]
     pub fn from_bytes_vartime(s: &[u8; 32]) -> Option<GeP3> {
         Self::from_bytes_negate_vartime(s).map(|p| GeP3 {
             x: p.x.neg(),
@@ -1510,3 +1510,11 @@ static BI: [GePrecomp; 8] = [
         ]),
     },
 ];
+
+#[cfg(feature = "x25519")]
+pub fn ge_to_x25519_vartime(s: &[u8; 32]) -> Option<[u8; 32]> {
+    let p = GeP3::from_bytes_vartime(s)?;
+    let yed = p.y;
+    let x_mont = (FE_ONE + yed) * ((FE_ONE - yed).invert());
+    Some(x_mont.to_bytes())
+}

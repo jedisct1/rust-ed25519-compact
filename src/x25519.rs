@@ -197,17 +197,77 @@ impl Deref for KeyPair {
     }
 }
 
+#[cfg(not(feature = "disable-signatures"))]
+mod from_ed25519 {
+    use super::super::{
+        edwards25519, sha512, KeyPair as EdKeyPair, PublicKey as EdPublicKey,
+        SecretKey as EdSecretKey,
+    };
+    use super::*;
+
+    impl SecretKey {
+        /// Convert an Ed25519 secret key to a X25519 secret key.
+        pub fn from_ed25519(edsk: &EdSecretKey) -> Result<SecretKey, Error> {
+            let seed = edsk.seed();
+            let az: [u8; 64] = {
+                let mut hash_output = sha512::Hash::hash(*seed);
+                hash_output[0] &= 248;
+                hash_output[31] &= 63;
+                hash_output[31] |= 64;
+                hash_output
+            };
+            SecretKey::from_slice(&az[..32])
+        }
+    }
+
+    impl PublicKey {
+        /// Convert an Ed25519 secret key to a X25519 secret key.
+        pub fn from_ed25519(edpk: &EdPublicKey) -> Result<PublicKey, Error> {
+            let pk = PublicKey::from_slice(
+                &edwards25519::ge_to_x25519_vartime(edpk).ok_or(Error::InvalidPublicKey)?,
+            )?;
+            pk.clear_cofactor()?;
+            Ok(pk)
+        }
+    }
+
+    impl KeyPair {
+        /// Convert an Ed25519 key pair to a X25519 key pair.
+        pub fn from_ed25519(edkp: &EdKeyPair) -> Result<KeyPair, Error> {
+            let pk = PublicKey::from_ed25519(&edkp.pk)?;
+            let sk = SecretKey::from_ed25519(&edkp.sk)?;
+            Ok(KeyPair { pk, sk })
+        }
+    }
+}
+
+#[cfg(not(feature = "disable-signatures"))]
+pub use from_ed25519::*;
+
 #[test]
 fn test_x25519() {
-    let kp_1 = SecretKey::from_slice(&[
+    let sk_1 = SecretKey::from_slice(&[
         1u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0,
     ])
     .unwrap();
-    let pk_1 = PublicKey::base_point().unclamped_mul(&kp_1).unwrap();
+    let pk_1 = PublicKey::base_point().unclamped_mul(&sk_1).unwrap();
     assert_eq!(pk_1, PublicKey::base_point());
     let kp_a = KeyPair::generate();
     let kp_b = KeyPair::generate();
+    let secret_a = kp_b.pk.dh(&kp_a.sk).unwrap();
+    let secret_b = kp_a.pk.dh(&kp_b.sk).unwrap();
+    assert_eq!(secret_a, secret_b);
+}
+
+#[cfg(not(feature = "disable-signatures"))]
+#[test]
+fn test_x25519_map() {
+    use super::KeyPair as EdKeyPair;
+    let edkp_a = EdKeyPair::generate();
+    let edkp_b = EdKeyPair::generate();
+    let kp_a = KeyPair::from_ed25519(&edkp_a).unwrap();
+    let kp_b = KeyPair::from_ed25519(&edkp_b).unwrap();
     let secret_a = kp_b.pk.dh(&kp_a.sk).unwrap();
     let secret_b = kp_a.pk.dh(&kp_b.sk).unwrap();
     assert_eq!(secret_a, secret_b);
