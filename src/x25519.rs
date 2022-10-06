@@ -221,7 +221,7 @@ mod from_ed25519 {
     }
 
     impl PublicKey {
-        /// Convert an Ed25519 secret key to a X25519 secret key.
+        /// Convert an Ed25519 public key to a X25519 public key.
         pub fn from_ed25519(edpk: &EdPublicKey) -> Result<PublicKey, Error> {
             let pk = PublicKey::from_slice(
                 &edwards25519::ge_to_x25519_vartime(edpk).ok_or(Error::InvalidPublicKey)?,
