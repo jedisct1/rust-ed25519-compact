@@ -70,12 +70,12 @@ st.absorb("sage");
 let signature = st.sign();
 
 /// Create a state for an incremental verifier.
-let mut st = kp.pk.verify_incremental(&signature).unwrap();
+let mut st = kp.pk.verify_incremental(&signature)?;
 
 /// Feed the message as any number of chunks, and verify the concatenation.
 st.absorb("mess");
 st.absorb("age");
-assert!(st.verify().is_ok());
+st.verify()?;
 ```
 
 ## Cargo features
