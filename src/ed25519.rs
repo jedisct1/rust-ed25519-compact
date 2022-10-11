@@ -44,6 +44,12 @@ impl Deref for PublicKey {
     }
 }
 
+impl DerefMut for PublicKey {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 /// A secret key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
@@ -147,6 +153,12 @@ impl Deref for Signature {
     /// Returns a signture as bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Signature {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -340,6 +352,12 @@ impl Deref for Noise {
     /// Returns a noise as raw bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Noise {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 

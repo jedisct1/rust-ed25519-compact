@@ -104,6 +104,12 @@ impl Deref for PublicKey {
     }
 }
 
+impl DerefMut for PublicKey {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 /// A secret key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);

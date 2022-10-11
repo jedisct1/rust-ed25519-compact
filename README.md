@@ -63,3 +63,7 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size reduction at the cost of 6.5-7% performance).
 * `x25519`: Enable support for the X25519 key exchange system.
 * `disable-signatures`: Disable support for signatures, and only compile support for X25519.
+
+## Zeroizing
+
+`zeroize::Zeroize` is not implemented, even as a feature, but you can easily implement it yourselves on types that need it by using the `DerefMut<Target = [u8; _]>` implementations.
