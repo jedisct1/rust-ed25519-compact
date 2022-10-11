@@ -4,6 +4,53 @@ use super::common::*;
 use super::error::Error;
 use super::field25519::*;
 
+/// Non-uniform output of a scalar multiplication.
+/// This represents a point on the curve, and should not be used directly as a
+/// cipher key.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct DHOutput([u8; DHOutput::BYTES]);
+
+impl DHOutput {
+    pub const BYTES: usize = 32;
+}
+
+impl Deref for DHOutput {
+    type Target = [u8; DHOutput::BYTES];
+
+    /// Returns the output of the scalar multiplication as bytes.
+    /// The output is not uniform, and should be hashed before use.
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for DHOutput {
+    /// Returns the output of the scalar multiplication as bytes.
+    /// The output is not uniform, and should be hashed before use.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl From<DHOutput> for PublicKey {
+    fn from(dh: DHOutput) -> Self {
+        PublicKey(dh.0)
+    }
+}
+
+impl From<DHOutput> for SecretKey {
+    fn from(dh: DHOutput) -> Self {
+        SecretKey(dh.0)
+    }
+}
+
+impl DHOutput {
+    /// Tentatively overwrite the output with zeros.
+    pub fn wipe(self) {
+        Mem::wipe(self.0)
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PublicKey([u8; PublicKey::BYTES]);
 
@@ -29,7 +76,7 @@ impl PublicKey {
 
     /// Multiply a point by the cofactor, returning an error if the element is
     /// in a small-order group.
-    pub fn clear_cofactor(&self) -> Result<Self, Error> {
+    pub fn clear_cofactor(&self) -> Result<[u8; PublicKey::BYTES], Error> {
         let cofactor = [
             8u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0,
@@ -39,19 +86,19 @@ impl PublicKey {
 
     /// Multiply the point represented by the public key by the scalar after
     /// clamping it
-    pub fn dh(&self, sk: &SecretKey) -> Result<Self, Error> {
+    pub fn dh(&self, sk: &SecretKey) -> Result<DHOutput, Error> {
         let sk = sk.clamped();
-        self.ladder(&sk.0, 255)
+        Ok(DHOutput(self.ladder(&sk.0, 255)?))
     }
 
     /// Multiply the point represented by the public key by the scalar WITHOUT
     /// CLAMPING
-    pub fn unclamped_mul(&self, sk: &SecretKey) -> Result<Self, Error> {
+    pub fn unclamped_mul(&self, sk: &SecretKey) -> Result<DHOutput, Error> {
         self.clear_cofactor()?;
-        self.ladder(&sk.0, 256)
+        Ok(DHOutput(self.ladder(&sk.0, 256)?))
     }
 
-    pub(crate) fn ladder(&self, s: &[u8], bits: usize) -> Result<Self, Error> {
+    pub(crate) fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; PublicKey::BYTES], Error> {
         let x1 = Fe::from_bytes(&self.0);
         let mut x2 = FE_ONE;
         let mut z2 = FE_ZERO;
@@ -86,7 +133,7 @@ impl PublicKey {
         if !x2.is_nonzero() {
             return Err(Error::WeakPublicKey);
         }
-        Ok(PublicKey(x2.to_bytes()))
+        Ok(x2.to_bytes())
     }
 
     /// The Curve25519 base point
@@ -140,7 +187,7 @@ impl SecretKey {
     /// Recover the public key
     pub fn recover_public_key(&self) -> Result<PublicKey, Error> {
         let sk = self.clamped();
-        PublicKey::base_point().ladder(&sk.0, 255)
+        Ok(PublicKey(PublicKey::base_point().ladder(&sk.0, 255)?))
     }
 
     /// Tentatively overwrite the secret key with zeros.
@@ -257,13 +304,13 @@ fn test_x25519() {
         0, 0,
     ])
     .unwrap();
-    let pk_1 = PublicKey::base_point().unclamped_mul(&sk_1).unwrap();
-    assert_eq!(pk_1, PublicKey::base_point());
+    let output = PublicKey::base_point().unclamped_mul(&sk_1).unwrap();
+    assert_eq!(PublicKey::from(output), PublicKey::base_point());
     let kp_a = KeyPair::generate();
     let kp_b = KeyPair::generate();
-    let secret_a = kp_b.pk.dh(&kp_a.sk).unwrap();
-    let secret_b = kp_a.pk.dh(&kp_b.sk).unwrap();
-    assert_eq!(secret_a, secret_b);
+    let output_a = kp_b.pk.dh(&kp_a.sk).unwrap();
+    let output_b = kp_a.pk.dh(&kp_b.sk).unwrap();
+    assert_eq!(output_a, output_b);
 }
 
 #[cfg(not(feature = "disable-signatures"))]
@@ -274,7 +321,7 @@ fn test_x25519_map() {
     let edkp_b = EdKeyPair::generate();
     let kp_a = KeyPair::from_ed25519(&edkp_a).unwrap();
     let kp_b = KeyPair::from_ed25519(&edkp_b).unwrap();
-    let secret_a = kp_b.pk.dh(&kp_a.sk).unwrap();
-    let secret_b = kp_a.pk.dh(&kp_b.sk).unwrap();
-    assert_eq!(secret_a, secret_b);
+    let output_a = kp_b.pk.dh(&kp_a.sk).unwrap();
+    let output_b = kp_a.pk.dh(&kp_b.sk).unwrap();
+    assert_eq!(output_a, output_b);
 }
