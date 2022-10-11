@@ -63,3 +63,4 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 * `opt_size`: Enable size optimizations (based on benchmarks, 8-15% size reduction at the cost of 6.5-7% performance).
 * `x25519`: Enable support for the X25519 key exchange system.
 * `disable-signatures`: Disable support for signatures, and only compile support for X25519.
+* `zeroizing`: Implements the [`Zeroize`](https://docs.rs/zeroize) trait for all public and secret keys as well as noise and seeds. This is not a "zeroize on `Drop`" implementation, call `.zeroize()` manually.

@@ -65,3 +65,10 @@ impl DerefMut for Seed {
         &mut self.0
     }
 }
+
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for Seed {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}

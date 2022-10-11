@@ -22,11 +22,13 @@ std = []
 opt_size = []
 disable-signatures = []
 x25519 = []
+zeroizing = ["zeroize"]
 
 [dependencies]
 ct-codecs = { version = "1.1", optional = true }
 getrandom = { version = "0.2", optional = true }
 ed25519 = { version = "1.5", optional = true }
+zeroize = { version = "1.5", optional = true, default-features = false }
 
 [dev-dependencies]
 getrandom = "0.2"

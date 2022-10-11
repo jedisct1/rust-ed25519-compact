@@ -44,6 +44,13 @@ impl Deref for PublicKey {
     }
 }
 
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for PublicKey {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
 /// A secret key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
@@ -96,6 +103,13 @@ impl DerefMut for SecretKey {
     }
 }
 
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for SecretKey {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
 /// A key pair.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct KeyPair {
@@ -103,6 +117,14 @@ pub struct KeyPair {
     pub pk: PublicKey,
     /// Secret key part of the key pair.
     pub sk: SecretKey,
+}
+
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for KeyPair {
+    fn zeroize(&mut self) {
+        self.pk.zeroize();
+        self.sk.zeroize();
+    }
 }
 
 /// An Ed25519 signature.
@@ -147,6 +169,13 @@ impl Deref for Signature {
     /// Returns a signture as bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for Signature {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
     }
 }
 
@@ -358,6 +387,13 @@ impl Noise {
     /// Generates random noise.
     pub fn generate() -> Self {
         Noise::default()
+    }
+}
+
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for Noise {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
     }
 }
 

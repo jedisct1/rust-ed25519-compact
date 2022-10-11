@@ -104,6 +104,13 @@ impl Deref for PublicKey {
     }
 }
 
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for PublicKey {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
 /// A secret key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
@@ -159,6 +166,13 @@ impl DerefMut for SecretKey {
     }
 }
 
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for SecretKey {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+    }
+}
+
 /// A key pair.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct KeyPair {
@@ -194,6 +208,14 @@ impl Deref for KeyPair {
     /// Returns a key pair as bytes.
     fn deref(&self) -> &Self::Target {
         &self.sk
+    }
+}
+
+#[cfg(feature = "zeroizing")]
+impl zeroize::Zeroize for KeyPair {
+    fn zeroize(&mut self) {
+        self.pk.zeroize();
+        self.sk.zeroize();
     }
 }
 
