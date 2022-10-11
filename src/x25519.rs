@@ -4,6 +4,8 @@ use super::common::*;
 use super::error::Error;
 use super::field25519::*;
 
+const POINT_BYTES: usize = 32;
+
 /// Non-uniform output of a scalar multiplication.
 /// This represents a point on the curve, and should not be used directly as a
 /// cipher key.
@@ -52,11 +54,11 @@ impl DHOutput {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-pub struct PublicKey([u8; PublicKey::BYTES]);
+pub struct PublicKey([u8; POINT_BYTES]);
 
 impl PublicKey {
     /// Number of raw bytes in a public key.
-    pub const BYTES: usize = 32;
+    pub const BYTES: usize = POINT_BYTES;
 
     /// Creates a public key from raw bytes.
     pub fn new(pk: [u8; PublicKey::BYTES]) -> Self {
@@ -98,7 +100,7 @@ impl PublicKey {
         Ok(DHOutput(self.ladder(&sk.0, 256)?))
     }
 
-    pub(crate) fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; PublicKey::BYTES], Error> {
+    pub(crate) fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; POINT_BYTES], Error> {
         let x1 = Fe::from_bytes(&self.0);
         let mut x2 = FE_ONE;
         let mut z2 = FE_ZERO;
@@ -222,9 +224,6 @@ pub struct KeyPair {
 }
 
 impl KeyPair {
-    /// Number of bytes in a key pair.
-    pub const BYTES: usize = SecretKey::BYTES;
-
     /// Generates a new key pair.
     #[cfg(feature = "random")]
     pub fn generate() -> KeyPair {
@@ -238,15 +237,6 @@ impl KeyPair {
             .recover_public_key()
             .expect("generated public key is weak");
         KeyPair { pk, sk }
-    }
-}
-
-impl Deref for KeyPair {
-    type Target = [u8; KeyPair::BYTES];
-
-    /// Returns a key pair as bytes.
-    fn deref(&self) -> &Self::Target {
-        &self.sk
     }
 }
 
