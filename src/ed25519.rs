@@ -272,7 +272,7 @@ impl SigningState {
     }
 
     /// Computes the signature and return it.
-    pub fn sign(self) -> Signature {
+    pub fn sign(&self) -> Signature {
         let mut signature: [u8; 64] = [0; 64];
         let r = ge_scalarmult_base(&self.nonce[0..32]);
         signature[0..32].copy_from_slice(&r.to_bytes()[..]);
