@@ -156,35 +156,60 @@ impl Deref for Signature {
     }
 }
 
-impl PublicKey {
-    /// Verifies that the signature `signature` is valid for the message
-    /// `message`.
-    pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
+/// The state of a streaming verification operation.
+pub struct VerifyingState {
+    hasher: sha512::Hash,
+    signature: Signature,
+    a: GeP3,
+}
+
+impl Drop for VerifyingState {
+    fn drop(&mut self) {
+        Mem::wipe(self.signature.0);
+    }
+}
+
+impl VerifyingState {
+    fn new(pk: &PublicKey, signature: &Signature) -> Result<Self, Error> {
         let r = &signature[0..32];
         let s = &signature[32..64];
         sc_reject_noncanonical(s)?;
-        if is_identity(self) || self.iter().fold(0, |acc, x| acc | x) == 0 {
+        if is_identity(pk) || pk.iter().fold(0, |acc, x| acc | x) == 0 {
             return Err(Error::WeakPublicKey);
         }
-        let a = match GeP3::from_bytes_negate_vartime(self) {
+        let a = match GeP3::from_bytes_negate_vartime(pk) {
             Some(g) => g,
             None => {
                 return Err(Error::InvalidPublicKey);
             }
         };
-
         let mut hasher = sha512::Hash::new();
         hasher.update(r);
-        hasher.update(&self[..]);
-        hasher.update(message);
-        let mut hash = hasher.finalize();
+        hasher.update(&pk[..]);
+        Ok(VerifyingState {
+            hasher,
+            signature: *signature,
+            a,
+        })
+    }
+
+    /// Appends data to the message being verified.
+    pub fn absorb(&mut self, chunk: impl AsRef<[u8]>) {
+        self.hasher.update(chunk)
+    }
+
+    /// Verifies the signature and return it.
+    pub fn verify(&self) -> Result<(), Error> {
+        let s = &self.signature[32..64];
+
+        let mut hash = self.hasher.finalize();
         sc_reduce(&mut hash);
 
-        let r = GeP2::double_scalarmult_vartime(hash.as_ref(), a, s);
+        let r = GeP2::double_scalarmult_vartime(hash.as_ref(), self.a, s);
         if r.to_bytes()
             .as_ref()
             .iter()
-            .zip(signature.iter())
+            .zip(self.signature.iter())
             .fold(0, |acc, (x, y)| acc | (x ^ y))
             != 0
         {
@@ -195,7 +220,99 @@ impl PublicKey {
     }
 }
 
+impl PublicKey {
+    /// Verify the signature of a multi-part message (streaming).
+    pub fn verify_incremental(&self, signature: &Signature) -> Result<VerifyingState, Error> {
+        VerifyingState::new(self, signature)
+    }
+
+    /// Verifies that the signature `signature` is valid for the message
+    /// `message`.
+    pub fn verify(&self, message: impl AsRef<[u8]>, signature: &Signature) -> Result<(), Error> {
+        let mut st = VerifyingState::new(self, signature)?;
+        st.absorb(message);
+        st.verify()
+    }
+}
+
+/// The state of a streaming signature operation.
+pub struct SigningState {
+    hasher: sha512::Hash,
+    az: [u8; 64],
+    nonce: [u8; 64],
+}
+
+impl Drop for SigningState {
+    fn drop(&mut self) {
+        Mem::wipe(self.az);
+        Mem::wipe(self.nonce);
+    }
+}
+
+impl SigningState {
+    fn new(nonce: [u8; 64], az: [u8; 64], pk_: &[u8]) -> Self {
+        let mut prefix: [u8; 64] = [0; 64];
+        let r = ge_scalarmult_base(&nonce[0..32]);
+        prefix[0..32].copy_from_slice(&r.to_bytes()[..]);
+        prefix[32..64].copy_from_slice(pk_);
+
+        let mut st = sha512::Hash::new();
+        st.update(prefix);
+
+        SigningState {
+            hasher: st,
+            nonce,
+            az,
+        }
+    }
+
+    /// Appends data to the message being signed.
+    pub fn absorb(&mut self, chunk: impl AsRef<[u8]>) {
+        self.hasher.update(chunk)
+    }
+
+    /// Computes the signature and return it.
+    pub fn sign(self) -> Signature {
+        let mut signature: [u8; 64] = [0; 64];
+        let r = ge_scalarmult_base(&self.nonce[0..32]);
+        signature[0..32].copy_from_slice(&r.to_bytes()[..]);
+        let mut hram = self.hasher.finalize();
+        sc_reduce(&mut hram);
+        sc_muladd(
+            &mut signature[32..64],
+            &hram[0..32],
+            &self.az[0..32],
+            &self.nonce[0..32],
+        );
+        Signature(signature)
+    }
+}
+
 impl SecretKey {
+    /// Sign a multi-part message (streaming API).
+    /// It is critical for `noise` to never repeat.
+    pub fn sign_incremental(&self, noise: Noise) -> SigningState {
+        let seed = &self[0..32];
+        let pk = &self[32..64];
+        let az: [u8; 64] = {
+            let mut hash_output = sha512::Hash::hash(seed);
+            hash_output[0] &= 248;
+            hash_output[31] &= 63;
+            hash_output[31] |= 64;
+            hash_output
+        };
+        let mut st = sha512::Hash::new();
+        #[cfg(feature = "random")]
+        {
+            let additional_noise = Noise::generate();
+            st.update(additional_noise.as_ref());
+        }
+        st.update(noise.as_ref());
+        st.update(seed);
+        let nonce = st.finalize();
+        SigningState::new(nonce, az, pk)
+    }
+
     /// Computes a signature for the message `message` using the secret key.
     /// The noise parameter is optional, but recommended in order to mitigate
     /// fault attacks.
@@ -222,22 +339,9 @@ impl SecretKey {
             sc_reduce(&mut hash_output[0..64]);
             hash_output
         };
-        let mut signature: [u8; 64] = [0; 64];
-        let r = ge_scalarmult_base(&nonce[0..32]);
-        signature[0..32].copy_from_slice(&r.to_bytes()[..]);
-        signature[32..64].copy_from_slice(pk);
-        let mut hasher = sha512::Hash::new();
-        hasher.update(signature.as_ref());
-        hasher.update(&message);
-        let mut hram = hasher.finalize();
-        sc_reduce(&mut hram);
-        sc_muladd(
-            &mut signature[32..64],
-            &hram[0..32],
-            &az[0..32],
-            &nonce[0..32],
-        );
-        let signature = Signature(signature);
+        let mut st = SigningState::new(nonce, az, pk);
+        st.absorb(&message);
+        let signature = st.sign();
 
         #[cfg(feature = "self-verify")]
         {
@@ -246,6 +350,7 @@ impl SecretKey {
                 .verify(message, &signature)
                 .expect("Newly created signature cannot be verified");
         }
+
         signature
     }
 }
@@ -750,4 +855,23 @@ fn test_blind_ed25519() {
     let signature = blind_kp.blind_sk.sign(message, None);
     assert_eq!(Hex::decode_to_vec("947bacfabc63448f8955dc20630e069e58f37b72bb433ae17f2fa904ea860b44deb761705a3cc2168a6673ee0b41ff7765c7a4896941eec6833c1689315acb0b",
         None).unwrap(), signature.as_ref());
+}
+
+#[test]
+fn test_streaming() {
+    let kp = KeyPair::generate();
+
+    let msg1 = "mes";
+    let msg2 = "sage";
+    let mut st = kp.sk.sign_incremental(Noise::default());
+    st.absorb(msg1);
+    st.absorb(msg2);
+    let signature = st.sign();
+
+    let msg1 = "mess";
+    let msg2 = "age";
+    let mut st = kp.pk.verify_incremental(&signature).unwrap();
+    st.absorb(msg1);
+    st.absorb(msg2);
+    assert!(st.verify().is_ok());
 }

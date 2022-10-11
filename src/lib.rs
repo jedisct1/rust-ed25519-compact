@@ -7,6 +7,7 @@
 //! * Lightweight
 //! * Zero dependencies if randomness is provided by the application
 //! * Only one portable dependency (`getrandom`) if not
+//! * Supports incremental signatures (streaming API)
 //! * Safe and simple Rust interface.
 //!
 //! Example usage:
@@ -39,6 +40,33 @@
 //! // All these structures can be viewed as raw bytes simply by dereferencing them:
 //! let signature_as_bytes: &[u8] = signature.as_ref();
 //! println!("Signature as bytes: {:?}", signature_as_bytes);
+//! ```
+//!
+//! ## Incremental API example usage
+//!
+//! Messages can also be supplied as multiple parts (streaming API):
+//!
+//! ```rust
+//! use ed25519_compact::*;
+//!
+//! /// Creates a new key pair.
+//! let kp = KeyPair::generate();
+//!
+//! /// Create a state for an incremental signer.
+//! let mut st = kp.sk.sign_incremental(Noise::default());
+//!
+//! /// Feed the message as any number of chunks, and sign the concatenation.
+//! st.absorb("mes");
+//! st.absorb("sage");
+//! let signature = st.sign();
+//!
+//! /// Create a state for an incremental verifier.
+//! let mut st = kp.pk.verify_incremental(&signature).unwrap();
+//!
+//! /// Feed the message as any number of chunks, and verify the concatenation.
+//! st.absorb("mess");
+//! st.absorb("age");
+//! assert!(st.verify().is_ok());
 //! ```
 //!
 //! Cargo features:
