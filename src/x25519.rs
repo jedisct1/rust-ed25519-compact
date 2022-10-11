@@ -100,7 +100,7 @@ impl PublicKey {
         Ok(DHOutput(self.ladder(&sk.0, 256)?))
     }
 
-    pub(crate) fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; POINT_BYTES], Error> {
+    fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; POINT_BYTES], Error> {
         let x1 = Fe::from_bytes(&self.0);
         let mut x2 = FE_ONE;
         let mut z2 = FE_ZERO;
