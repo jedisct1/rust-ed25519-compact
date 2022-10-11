@@ -20,7 +20,7 @@
 
 ```toml
 [dependencies]
-ed25519-compact = "0.1"
+ed25519-compact = "2"
 ```
 
 Example code:
@@ -61,18 +61,18 @@ Messages can also be supplied as multiple parts (streaming API) in order to hand
 /// Creates a new key pair.
 let kp = KeyPair::generate();
 
-/// Create a state for an incremental signer.
+/// Creates a state for an incremental signer.
 let mut st = kp.sk.sign_incremental(Noise::default());
 
-/// Feed the message as any number of chunks, and sign the concatenation.
+/// Feeds the message as any number of chunks, and sign the concatenation.
 st.absorb("mes");
 st.absorb("sage");
 let signature = st.sign();
 
-/// Create a state for an incremental verifier.
+/// Creates a state for an incremental verifier.
 let mut st = kp.pk.verify_incremental(&signature)?;
 
-/// Feed the message as any number of chunks, and verify the concatenation.
+/// Feeds the message as any number of chunks, and verify the concatenation.
 st.absorb("mess");
 st.absorb("age");
 st.verify()?;
