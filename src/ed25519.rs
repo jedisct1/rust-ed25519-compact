@@ -157,6 +157,7 @@ impl Deref for Signature {
 }
 
 /// The state of a streaming verification operation.
+#[derive(Clone)]
 pub struct VerifyingState {
     hasher: sha512::Hash,
     signature: Signature,
@@ -236,6 +237,7 @@ impl PublicKey {
 }
 
 /// The state of a streaming signature operation.
+#[derive(Clone)]
 pub struct SigningState {
     hasher: sha512::Hash,
     az: [u8; 64],
