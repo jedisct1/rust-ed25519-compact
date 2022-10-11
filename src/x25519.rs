@@ -9,7 +9,7 @@ const POINT_BYTES: usize = 32;
 /// Non-uniform output of a scalar multiplication.
 /// This represents a point on the curve, and should not be used directly as a
 /// cipher key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct DHOutput([u8; DHOutput::BYTES]);
 
 impl DHOutput {
@@ -46,9 +46,8 @@ impl From<DHOutput> for SecretKey {
     }
 }
 
-impl DHOutput {
-    /// Tentatively overwrite the output with zeros.
-    pub fn wipe(self) {
+impl Drop for DHOutput {
+    fn drop(&mut self) {
         Mem::wipe(self.0)
     }
 }
@@ -155,7 +154,7 @@ impl Deref for PublicKey {
 }
 
 /// A secret key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
 
 impl SecretKey {
@@ -179,7 +178,7 @@ impl SecretKey {
 
     /// Perform the X25519 clamping magic
     pub fn clamped(&self) -> SecretKey {
-        let mut clamped = *self;
+        let mut clamped = self.clone();
         clamped[0] &= 248;
         clamped[31] &= 63;
         clamped[31] |= 64;
@@ -191,9 +190,10 @@ impl SecretKey {
         let sk = self.clamped();
         Ok(PublicKey(PublicKey::base_point().ladder(&sk.0, 255)?))
     }
+}
 
-    /// Tentatively overwrite the secret key with zeros.
-    pub fn wipe(&mut self) {
+impl Drop for SecretKey {
+    fn drop(&mut self) {
         Mem::wipe(self.0)
     }
 }
@@ -215,7 +215,7 @@ impl DerefMut for SecretKey {
 }
 
 /// A key pair.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct KeyPair {
     /// Public key part of the key pair.
     pub pk: PublicKey,

@@ -45,7 +45,7 @@ impl Deref for PublicKey {
 }
 
 /// A secret key.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
 
 impl SecretKey {
@@ -78,9 +78,10 @@ impl SecretKey {
     pub fn seed(&self) -> Seed {
         Seed::from_slice(&self[0..Seed::BYTES]).unwrap()
     }
+}
 
-    /// Tentatively overwrite the secret key with zeros.
-    pub fn wipe(self) {
+impl Drop for SecretKey {
+    fn drop(&mut self) {
         Mem::wipe(self.0)
     }
 }
@@ -102,7 +103,7 @@ impl DerefMut for SecretKey {
 }
 
 /// A key pair.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct KeyPair {
     /// Public key part of the key pair.
     pub pk: PublicKey,
@@ -429,7 +430,7 @@ fn test_ed25519() {
 mod blind_keys {
     use super::*;
 
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+    #[derive(Clone, Debug, Eq, PartialEq, Hash)]
     pub struct Blind([u8; Blind::BYTES]);
 
     impl From<[u8; 32]> for Blind {
@@ -456,9 +457,10 @@ mod blind_keys {
             blind_.copy_from_slice(blind);
             Ok(Blind::new(blind_))
         }
+    }
 
-        /// Tentatively overwrite the blind with zeros.
-        pub fn wipe(self) {
+    impl Drop for Blind {
+        fn drop(&mut self) {
             Mem::wipe(self.0)
         }
     }
@@ -566,14 +568,14 @@ mod blind_keys {
     }
 
     /// A blind secret key.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+    #[derive(Clone, Debug, Eq, PartialEq, Hash)]
     pub struct BlindSecretKey {
         pub prefix: [u8; 2 * Seed::BYTES],
         pub blind_scalar: [u8; 32],
         pub blind_pk: BlindPublicKey,
     }
 
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+    #[derive(Clone, Debug, Eq, PartialEq, Hash)]
     pub struct BlindKeyPair {
         /// Public key part of the blind key pair.
         pub blind_pk: BlindPublicKey,
@@ -625,9 +627,10 @@ mod blind_keys {
             }
             signature
         }
+    }
 
-        /// Tentatively overwrite the blind secret key with zeros.
-        pub fn wipe(self) {
+    impl Drop for BlindSecretKey {
+        fn drop(&mut self) {
             Mem::wipe(self.prefix);
             Mem::wipe(self.blind_scalar);
         }
