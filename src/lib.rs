@@ -44,7 +44,8 @@
 //!
 //! ## Incremental API example usage
 //!
-//! Messages can also be supplied as multiple parts (streaming API):
+//! Messages can also be supplied as multiple parts (streaming API) in order to
+//! handle large messages without using much memory:
 //!
 //! ```rust
 //! use ed25519_compact::*;

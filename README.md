@@ -55,7 +55,7 @@ println!("Signature as bytes: {:?}", signature_as_bytes);
 
 ## Incremental API example usage
 
-Messages can also be supplied as multiple parts (streaming API):
+Messages can also be supplied as multiple parts (streaming API) in order to handle large messages without using much memory:
 
 ```rust
 /// Creates a new key pair.
