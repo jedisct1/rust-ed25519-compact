@@ -1,8 +1,8 @@
 use super::error::Error;
 
 use core::ops::{Deref, DerefMut};
-use std::ptr;
-use std::sync::atomic;
+use core::ptr;
+use core::sync::atomic;
 
 /// A seed, which a key pair can be derived from.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
