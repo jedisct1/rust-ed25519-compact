@@ -78,6 +78,11 @@ impl SecretKey {
     pub fn seed(&self) -> Seed {
         Seed::from_slice(&self[0..Seed::BYTES]).unwrap()
     }
+
+    /// Tentatively overwrite the secret key with zeros.
+    pub fn wipe(self) {
+        Mem::wipe(self.0)
+    }
 }
 
 impl Deref for SecretKey {
@@ -451,6 +456,11 @@ mod blind_keys {
             blind_.copy_from_slice(blind);
             Ok(Blind::new(blind_))
         }
+
+        /// Tentatively overwrite the blind with zeros.
+        pub fn wipe(self) {
+            Mem::wipe(self.0)
+        }
     }
 
     #[cfg(feature = "random")]
@@ -517,7 +527,7 @@ mod blind_keys {
             let pk_p3 = GeP3::from_bytes_vartime(&self.0).ok_or(Error::InvalidPublicKey)?;
             let mut hx = sha512::Hash::new();
             hx.update(&blind[..]);
-            hx.update(&[0u8]);
+            hx.update([0u8]);
             hx.update(ctx.as_ref());
             let hash_output = hx.finalize();
             let (blind_factor, _) = KeyPair::split(&hash_output, true, false);
@@ -573,9 +583,9 @@ mod blind_keys {
                 let mut hasher = sha512::Hash::new();
                 if let Some(noise) = noise {
                     hasher.update(&noise[..]);
-                    hasher.update(&self.prefix);
+                    hasher.update(self.prefix);
                 } else {
-                    hasher.update(&self.prefix);
+                    hasher.update(self.prefix);
                 }
                 hasher.update(&message);
                 let mut hash_output = hasher.finalize();
@@ -608,6 +618,12 @@ mod blind_keys {
             }
             signature
         }
+
+        /// Tentatively overwrite the blind secret key with zeros.
+        pub fn wipe(self) {
+            Mem::wipe(self.prefix);
+            Mem::wipe(self.blind_scalar);
+        }
     }
 
     impl PublicKey {
@@ -616,7 +632,7 @@ mod blind_keys {
             let (blind_factor, _prefix2) = {
                 let mut hx = sha512::Hash::new();
                 hx.update(&blind[..]);
-                hx.update(&[0u8]);
+                hx.update([0u8]);
                 hx.update(ctx.as_ref());
                 let hash_output = hx.finalize();
                 KeyPair::split(&hash_output, true, false)
@@ -640,7 +656,7 @@ mod blind_keys {
             let (blind_factor, prefix2) = {
                 let mut hx = sha512::Hash::new();
                 hx.update(&blind[..]);
-                hx.update(&[0u8]);
+                hx.update([0u8]);
                 hx.update(ctx.as_ref());
                 let hash_output = hx.finalize();
                 KeyPair::split(&hash_output, true, false)

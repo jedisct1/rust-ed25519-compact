@@ -1,6 +1,8 @@
-use core::ops::{Deref, DerefMut};
-
 use super::error::Error;
+
+use core::ops::{Deref, DerefMut};
+use std::ptr;
+use std::sync::atomic;
 
 /// A seed, which a key pair can be derived from.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -29,6 +31,11 @@ impl Seed {
         }
         seed_.copy_from_slice(seed);
         Ok(Seed::new(seed_))
+    }
+
+    /// Tentatively overwrite the content of the seed with zeros.
+    pub fn wipe(self) {
+        Mem::wipe(self.0)
     }
 }
 
@@ -63,5 +70,21 @@ impl DerefMut for Seed {
     /// Returns a seed as mutable raw bytes.
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+pub(crate) struct Mem;
+
+impl Mem {
+    #[inline]
+    pub fn wipe<T: Default>(mut x: impl AsMut<[T]>) {
+        let x = x.as_mut();
+        for i in 0..x.len() {
+            unsafe {
+                ptr::write_volatile(x.as_mut_ptr().add(i), T::default());
+            }
+        }
+        atomic::compiler_fence(atomic::Ordering::SeqCst);
+        atomic::fence(atomic::Ordering::SeqCst);
     }
 }

@@ -1,5 +1,6 @@
 use core::ops::{Deref, DerefMut};
 
+use super::common::*;
 use super::error::Error;
 use super::field25519::*;
 
@@ -140,6 +141,11 @@ impl SecretKey {
     pub fn recover_public_key(&self) -> Result<PublicKey, Error> {
         let sk = self.clamped();
         PublicKey::base_point().ladder(&sk.0, 255)
+    }
+
+    /// Tentatively overwrite the secret key with zeros.
+    pub fn wipe(&mut self) {
+        Mem::wipe(self.0)
     }
 }
 
