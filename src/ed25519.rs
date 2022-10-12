@@ -44,6 +44,13 @@ impl Deref for PublicKey {
     }
 }
 
+impl DerefMut for PublicKey {
+    /// Returns a public key as mutable bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 /// A secret key.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SecretKey([u8; SecretKey::BYTES]);
@@ -153,6 +160,13 @@ impl Deref for Signature {
     /// Returns a signture as bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Signature {
+    /// Returns a signature as mutable bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -423,6 +437,13 @@ impl Deref for KeyPair {
     }
 }
 
+impl DerefMut for KeyPair {
+    /// Returns a key pair as mutable bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.sk
+    }
+}
+
 /// Noise, for non-deterministic signatures.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Noise([u8; Noise::BYTES]);
@@ -450,9 +471,16 @@ impl Noise {
 impl Deref for Noise {
     type Target = [u8; Noise::BYTES];
 
-    /// Returns a noise as raw bytes.
+    /// Returns the noise as bytes.
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Noise {
+    /// Returns the noise as mutable bytes.
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -593,14 +621,14 @@ mod blind_keys {
     impl Deref for Blind {
         type Target = [u8; Blind::BYTES];
 
-        /// Returns a blind as raw bytes.
+        /// Returns a blind as bytes.
         fn deref(&self) -> &Self::Target {
             &self.0
         }
     }
 
     impl DerefMut for Blind {
-        /// Returns a blind as raw bytes.
+        /// Returns a blind as mutable bytes.
         fn deref_mut(&mut self) -> &mut Self::Target {
             &mut self.0
         }
@@ -616,6 +644,13 @@ mod blind_keys {
         /// Returns a public key as bytes.
         fn deref(&self) -> &Self::Target {
             &self.0
+        }
+    }
+
+    impl DerefMut for BlindPublicKey {
+        /// Returns a public key as mutable bytes.
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            &mut self.0
         }
     }
 
