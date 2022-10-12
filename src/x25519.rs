@@ -52,6 +52,7 @@ impl Drop for DHOutput {
     }
 }
 
+/// A public key.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PublicKey([u8; POINT_BYTES]);
 
