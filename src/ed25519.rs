@@ -382,7 +382,7 @@ impl KeyPair {
     }
 
     /// Generates a new key pair using a secret seed.
-    /// 
+    ///
     /// This function will panic if an all-zero seed is provided.
     pub fn from_seed(seed: Seed) -> KeyPair {
         if seed.iter().fold(0, |acc, x| acc | x) == 0 {
@@ -412,7 +412,7 @@ impl KeyPair {
     /// Creates a key pair, if the public key matches the secret key.
     /// This recomputes the public key from the secret and compares that with
     /// the provided slice.
-    /// 
+    ///
     /// This function will panic if an all-zero seed is provided.
     pub fn from_untrusted_public(bytes: &[u8]) -> Result<Self, Error> {
         let sk = SecretKey::from_slice(bytes)?;
@@ -577,6 +577,32 @@ fn test_ed25519() {
             216, 171, 15, 188, 181, 136, 7,
         ]
     );
+}
+
+#[test]
+#[cfg(feature = "random")]
+fn test_ed25519_from_untrusted_public() {
+    let kp_one = KeyPair::from_seed(Seed::default());
+    let kp_two = KeyPair::from_seed(Seed::default());
+
+    let mut bytes_one = [0u8; SecretKey::BYTES];
+    bytes_one[..32].copy_from_slice(&kp_one.sk[..32]);
+    bytes_one[32..].copy_from_slice(&kp_two.pk[..]);
+
+    let mut bytes_two = [0u8; SecretKey::BYTES];
+    bytes_two[..32].copy_from_slice(&kp_two.sk[..32]);
+    bytes_two[32..].copy_from_slice(&kp_one.pk[..]);
+
+    assert_eq!(
+        KeyPair::from_untrusted_public(&bytes_one).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert_eq!(
+        KeyPair::from_untrusted_public(&bytes_two).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert!(KeyPair::from_untrusted_public(&kp_one.sk[..]).is_ok());
+    assert!(KeyPair::from_untrusted_public(&kp_two.sk[..]).is_ok());
 }
 
 #[cfg(feature = "blind-keys")]
