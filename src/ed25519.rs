@@ -420,12 +420,15 @@ impl KeyPair {
         Ok(KeyPair { pk, sk })
     }
 
+    /// Clamp a scalar.
     pub fn clamp(scalar: &mut [u8]) {
         scalar[0] &= 248;
         scalar[31] &= 63;
         scalar[31] |= 64;
     }
 
+    /// Split a serialized representation of a key pair into a secret scalar and
+    /// a prefix.
     pub fn split(bytes: &[u8; 64], reduce: bool, clamp: bool) -> ([u8; 32], [u8; 32]) {
         let mut scalar = [0u8; 32];
         scalar.copy_from_slice(&bytes[0..32]);
@@ -438,6 +441,11 @@ impl KeyPair {
         let mut prefix = [0u8; 32];
         prefix.copy_from_slice(&bytes[32..64]);
         (scalar, prefix)
+    }
+
+    /// Check that the public key is valid for the secret key.
+    pub fn validate(&self) -> Result<(), Error> {
+        self.sk.validate_public_key(&self.pk)
     }
 }
 
@@ -942,4 +950,5 @@ fn test_ed25519_invalid_keypair() {
     );
     assert!(kp1.sk.validate_public_key(&kp1.pk).is_ok());
     assert!(kp2.sk.validate_public_key(&kp2.pk).is_ok());
+    assert!(kp1.validate().is_ok());
 }

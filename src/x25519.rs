@@ -257,6 +257,11 @@ impl KeyPair {
             .expect("generated public key is weak");
         KeyPair { pk, sk }
     }
+
+    /// Check that the public key is valid for the secret key.
+    pub fn validate(&self) -> Result<(), Error> {
+        self.sk.validate_public_key(&self.pk)
+    }
 }
 
 #[cfg(not(feature = "disable-signatures"))]
@@ -351,4 +356,5 @@ fn test_x25519_invalid_keypair() {
     );
     assert!(kp1.sk.validate_public_key(&kp1.pk).is_ok());
     assert!(kp2.sk.validate_public_key(&kp2.pk).is_ok());
+    assert!(kp1.validate().is_ok());
 }
