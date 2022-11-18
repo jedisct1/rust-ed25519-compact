@@ -85,6 +85,19 @@ impl SecretKey {
     pub fn seed(&self) -> Seed {
         Seed::from_slice(&self[0..Seed::BYTES]).unwrap()
     }
+
+    /// Returns `Ok(())` if the given public key is the public counterpart of
+    /// this secret key.
+    /// Returns `Err(Error::InvalidPublicKey)` otherwise.
+    /// The public key is recomputed (not just copied) from the secret key,
+    /// so this will detect corruption of the secret key.
+    pub fn validate_public_key(&self, pk: &PublicKey) -> Result<(), Error> {
+        let kp = KeyPair::from_seed(self.seed());
+        if kp.pk != *pk {
+            return Err(Error::InvalidPublicKey);
+        }
+        Ok(())
+    }
 }
 
 impl Drop for SecretKey {
@@ -911,4 +924,22 @@ fn test_streaming() {
     st.absorb(msg1);
     st.absorb(msg2);
     assert!(st.verify().is_ok());
+}
+
+#[test]
+#[cfg(feature = "random")]
+fn test_ed25519_invalid_keypair() {
+    let kp1 = KeyPair::generate();
+    let kp2 = KeyPair::generate();
+
+    assert_eq!(
+        kp1.sk.validate_public_key(&kp2.pk).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert_eq!(
+        kp2.sk.validate_public_key(&kp1.pk).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert!(kp1.sk.validate_public_key(&kp1.pk).is_ok());
+    assert!(kp2.sk.validate_public_key(&kp2.pk).is_ok());
 }

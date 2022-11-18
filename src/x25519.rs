@@ -198,6 +198,17 @@ impl SecretKey {
         let sk = self.clamped();
         Ok(PublicKey(PublicKey::base_point().ladder(&sk.0, 255)?))
     }
+
+    /// Returns `Ok(())` if the given public key is the public counterpart of
+    /// this secret key.
+    /// Returns `Err(Error::InvalidPublicKey)` otherwise.
+    pub fn validate_public_key(&self, pk: &PublicKey) -> Result<(), Error> {
+        let recovered_pk = self.recover_public_key()?;
+        if recovered_pk != *pk {
+            return Err(Error::InvalidPublicKey);
+        }
+        Ok(())
+    }
 }
 
 impl Drop for SecretKey {
@@ -322,4 +333,22 @@ fn test_x25519_map() {
     let output_a = kp_b.pk.dh(&kp_a.sk).unwrap();
     let output_b = kp_a.pk.dh(&kp_b.sk).unwrap();
     assert_eq!(output_a, output_b);
+}
+
+#[test]
+#[cfg(all(not(feature = "disable-signatures"), feature = "random"))]
+fn test_x25519_invalid_keypair() {
+    let kp1 = KeyPair::generate();
+    let kp2 = KeyPair::generate();
+
+    assert_eq!(
+        kp1.sk.validate_public_key(&kp2.pk).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert_eq!(
+        kp2.sk.validate_public_key(&kp1.pk).unwrap_err(),
+        Error::InvalidPublicKey
+    );
+    assert!(kp1.sk.validate_public_key(&kp1.pk).is_ok());
+    assert!(kp2.sk.validate_public_key(&kp2.pk).is_ok());
 }
