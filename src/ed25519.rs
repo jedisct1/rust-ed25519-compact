@@ -382,6 +382,8 @@ impl KeyPair {
     }
 
     /// Generates a new key pair using a secret seed.
+    /// 
+    /// This function will panic if an all-zero seed is provided.
     pub fn from_seed(seed: Seed) -> KeyPair {
         if seed.iter().fold(0, |acc, x| acc | x) == 0 {
             panic!("All-zero seed");
@@ -405,6 +407,22 @@ impl KeyPair {
         let sk = SecretKey::from_slice(bytes)?;
         let pk = sk.public_key();
         Ok(KeyPair { pk, sk })
+    }
+
+    /// Creates a key pair, if the public key matches the secret key.
+    /// This recomputes the public key from the secret and compares that with
+    /// the provided slice.
+    /// 
+    /// This function will panic if an all-zero seed is provided.
+    pub fn from_untrusted_public(bytes: &[u8]) -> Result<Self, Error> {
+        let sk = SecretKey::from_slice(bytes)?;
+        let kp = KeyPair::from_seed(sk.seed());
+
+        if kp.pk != sk.public_key() {
+            return Err(Error::InvalidPublicKey);
+        }
+
+        Ok(kp)
     }
 
     pub fn clamp(scalar: &mut [u8]) {
