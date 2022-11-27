@@ -228,22 +228,20 @@ impl VerifyingState {
 
     /// Verifies the signature and return it.
     pub fn verify(&self) -> Result<(), Error> {
+        let mut expected_r_bytes = [0u8; 32];
+        expected_r_bytes.copy_from_slice(&self.signature[0..32]);
+        let expected_r =
+            GeP3::from_bytes_vartime(&expected_r_bytes).ok_or(Error::InvalidSignature)?;
         let s = &self.signature[32..64];
 
         let mut hash = self.hasher.finalize();
         sc_reduce(&mut hash);
 
-        let r = GeP2::double_scalarmult_vartime(hash.as_ref(), self.a, s);
-        if r.to_bytes()
-            .as_ref()
-            .iter()
-            .zip(self.signature.iter())
-            .fold(0, |acc, (x, y)| acc | (x ^ y))
-            != 0
-        {
-            Err(Error::SignatureMismatch)
-        } else {
+        let r: GeP3 = GeP2::double_scalarmult_vartime(hash.as_ref(), self.a, s).into();
+        if (expected_r - r).has_small_order() {
             Ok(())
+        } else {
+            Err(Error::SignatureMismatch)
         }
     }
 }

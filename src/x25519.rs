@@ -132,7 +132,7 @@ impl PublicKey {
         Fe::cswap2(&mut x2, &mut x3, &mut z2, &mut z3, swap);
         z2 = z2.invert();
         x2 = x2 * z2;
-        if !x2.is_nonzero() {
+        if x2.is_zero() {
             return Err(Error::WeakPublicKey);
         }
         Ok(x2.to_bytes())
@@ -248,7 +248,7 @@ impl KeyPair {
     pub fn generate() -> KeyPair {
         let mut sk = [0u8; SecretKey::BYTES];
         getrandom::getrandom(&mut sk).expect("getrandom");
-        if !Fe::from_bytes(&sk).is_nonzero() {
+        if Fe::from_bytes(&sk).is_zero() {
             panic!("All-zero secret key");
         }
         let sk = SecretKey(sk);

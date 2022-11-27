@@ -596,8 +596,8 @@ impl Fe {
         z_255_21
     }
 
-    pub fn is_nonzero(&self) -> bool {
-        self.to_bytes().iter().fold(0, |acc, x| acc | x) != 0
+    pub fn is_zero(&self) -> bool {
+        self.to_bytes().iter().fold(0, |acc, x| acc | x) == 0
     }
 
     pub fn is_negative(&self) -> bool {
