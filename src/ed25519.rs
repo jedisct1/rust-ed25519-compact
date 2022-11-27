@@ -237,8 +237,8 @@ impl VerifyingState {
         let mut hash = self.hasher.finalize();
         sc_reduce(&mut hash);
 
-        let r: GeP3 = GeP2::double_scalarmult_vartime(hash.as_ref(), self.a, s).into();
-        if (expected_r - r).has_small_order() {
+        let r = GeP2::double_scalarmult_vartime(hash.as_ref(), self.a, s);
+        if (expected_r - GeP3::from(r)).has_small_order() {
             Ok(())
         } else {
             Err(Error::SignatureMismatch)
