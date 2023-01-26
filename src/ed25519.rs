@@ -397,10 +397,7 @@ impl KeyPair {
         if seed.iter().fold(0, |acc, x| acc | x) == 0 {
             panic!("All-zero seed");
         }
-        let (scalar, _) = {
-            let hash_output = sha512::Hash::hash(&seed[..]);
-            KeyPair::split(&hash_output, false, true)
-        };
+        let scalar = seed.scalar();
         let pk = ge_scalarmult_base(&scalar).to_bytes();
         let mut sk = [0u8; 64];
         sk[0..32].copy_from_slice(&*seed);
