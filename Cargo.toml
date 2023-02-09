@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-compact"
-version = "2.0.3"
+version = "2.0.5"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
 description = "A small, self-contained, wasm-friendly Ed25519 implementation"
