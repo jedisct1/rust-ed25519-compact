@@ -3,7 +3,7 @@ use core::ptr;
 use core::sync::atomic;
 
 use super::error::Error;
-use super::{sha512, KeyPair};
+use super::sha512;
 
 /// A seed, which a key pair can be derived from.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -35,9 +35,10 @@ impl Seed {
     }
 
     /// Get the scalar value of the seed.
+    #[cfg(not(feature = "disable-signatures"))]
     pub fn scalar(&self) -> [u8; 32] {
         let hash_output = sha512::Hash::hash(&self[..]);
-        let (scalar, _) = KeyPair::split(&hash_output, false, true);
+        let (scalar, _) = crate::KeyPair::split(&hash_output, false, true);
 
         scalar
     }
