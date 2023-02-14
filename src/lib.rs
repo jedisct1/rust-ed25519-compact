@@ -114,7 +114,7 @@ pub use crate::error::*;
 #[cfg(not(feature = "disable-signatures"))]
 mod ed25519;
 #[cfg(not(feature = "disable-signatures"))]
-mod edwards25519;
+pub mod edwards25519;
 
 #[cfg(not(feature = "disable-signatures"))]
 pub use crate::ed25519::*;
