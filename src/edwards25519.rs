@@ -407,7 +407,7 @@ fn ge_precompute(base: &GeP3) -> [GeCached; 16] {
         pc[i] = if i % 2 == 0 {
             pc[i / 2].dbl().to_p3()
         } else {
-            pc[(i - 1)].add(base_cached).to_p3()
+            pc[i - 1].add(base_cached).to_p3()
         }
     }
     let mut pc_cached: [GeCached; 16] = Default::default();
