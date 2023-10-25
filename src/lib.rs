@@ -3,7 +3,7 @@
 //! * Formally-verified Curve25519 field arithmetic
 //! * `no_std`-friendly
 //! * WebAssembly-friendly
-//! * Compute@Edge-friendly
+//! * Fastly Compute-friendly
 //! * Lightweight
 //! * Zero dependencies if randomness is provided by the application
 //! * Only one portable dependency (`getrandom`) if not
