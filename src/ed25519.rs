@@ -527,7 +527,13 @@ mod ed25519_trait {
 
     use super::{PublicKey, SecretKey, Signature};
 
-    impl ::ed25519::SignatureEncoding for Signature {}
+    impl ed25519_trait::Signature for Signature {
+        fn from_bytes(bytes: &[u8]) -> Result<Self, ed25519_trait::Error> {
+            let mut bytes_ = [0u8; Signature::BYTES];
+            bytes_.copy_from_slice(bytes);
+            Ok(Signature::new(bytes_))
+        }
+    }
 
     impl ed25519_trait::Signer<Signature> for SecretKey {
         fn try_sign(&self, message: &[u8]) -> Result<Signature, ed25519_trait::Error> {
