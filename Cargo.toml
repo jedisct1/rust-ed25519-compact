@@ -23,11 +23,21 @@ opt_size = []
 disable-signatures = []
 x25519 = []
 
+[target.'cfg(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.2", optional = true, features = ["js"] }
+
+[target.'cfg(not(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown")))'.dependencies]
+getrandom = { version = "0.2", optional = true }
+
 [dependencies]
 ct-codecs = { version = "1.1", optional = true }
-getrandom = { version = "0.2", optional = true }
 ed25519 = { version = "1.5", optional = true }
 
+[target.'cfg(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown"))'.dev-dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+[target.'cfg(not(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown")))'.dev-dependencies]
+getrandom = { version = "0.2" }
+
 [dev-dependencies]
-getrandom = "0.2"
 ct-codecs = "1.1"
