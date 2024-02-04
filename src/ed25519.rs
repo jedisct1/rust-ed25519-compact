@@ -1,5 +1,6 @@
 use core::fmt;
 use core::ops::{Deref, DerefMut};
+use std::convert::TryFrom;
 
 use super::common::*;
 #[cfg(feature = "blind-keys")]
@@ -138,6 +139,14 @@ pub struct Signature([u8; Signature::BYTES]);
 impl fmt::Debug for Signature {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("{:x?}", &self.0))
+    }
+}
+
+impl TryFrom<&[u8]> for Signature {
+    type Error = Error;
+
+    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+        Signature::from_slice(slice)
     }
 }
 
@@ -527,12 +536,8 @@ mod ed25519_trait {
 
     use super::{PublicKey, SecretKey, Signature};
 
-    impl ed25519_trait::Signature for Signature {
-        fn from_bytes(bytes: &[u8]) -> Result<Self, ed25519_trait::Error> {
-            let mut bytes_ = [0u8; Signature::BYTES];
-            bytes_.copy_from_slice(bytes);
-            Ok(Signature::new(bytes_))
-        }
+    impl ed25519_trait::SignatureEncoding for Signature {
+        type Repr = Signature;
     }
 
     impl ed25519_trait::Signer<Signature> for SecretKey {
@@ -550,7 +555,7 @@ mod ed25519_trait {
             #[cfg(feature = "std")]
             {
                 self.verify(message, signature)
-                    .map_err(|e| ed25519_trait::Error::from_source(e))
+                    .map_err(ed25519_trait::Error::from_source)
             }
 
             #[cfg(not(feature = "std"))]

@@ -31,7 +31,7 @@ getrandom = { version = "0.2", optional = true }
 
 [dependencies]
 ct-codecs = { version = "1.1", optional = true }
-ed25519 = { version = "1.5", optional = true }
+ed25519 = { version = "2.2", optional = true }
 
 [target.'cfg(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown"))'.dev-dependencies]
 getrandom = { version = "0.2", features = ["js"] }
