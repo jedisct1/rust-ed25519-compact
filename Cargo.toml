@@ -13,12 +13,12 @@ license = "MIT"
 
 [features]
 default = ["random", "std", "x25519", "pem"]
-pem = ["ct-codecs"]
+pem = ["dep:ct-codecs"]
 random = ["getrandom"]
 traits = ["ed25519"]
 self-verify = []
 blind-keys = []
-std = []
+std = [ "ct-codecs?/std", "ed25519/std" ]
 opt_size = []
 disable-signatures = []
 x25519 = []
@@ -30,8 +30,8 @@ getrandom = { version = "0.2", optional = true, features = ["js"] }
 getrandom = { version = "0.2", optional = true }
 
 [dependencies]
-ct-codecs = { version = "1.1", optional = true }
-ed25519 = { version = "2.2", optional = true }
+ct-codecs = { version = "1.1", optional = true, default-features = false }
+ed25519 = { version = "2.2", optional = true, default-features = false }
 
 [target.'cfg(all(any(target_arch = "wasm32", target_arch = "wasm64"), target_os = "unknown"))'.dev-dependencies]
 getrandom = { version = "0.2", features = ["js"] }
