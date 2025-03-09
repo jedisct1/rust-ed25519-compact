@@ -517,7 +517,7 @@ impl Default for Noise {
     /// Generates random noise.
     fn default() -> Self {
         let mut noise = [0u8; Noise::BYTES];
-        getrandom::getrandom(&mut noise).expect("RNG failure");
+        getrandom::fill(&mut noise).expect("RNG failure");
         Noise(noise)
     }
 }
