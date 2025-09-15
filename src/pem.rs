@@ -132,7 +132,7 @@ MCowBQYDK2VwAyEAyrRjJfTnhMcW5igzYvPirFW5eUgMdKeClGzQhd4qw+Y=
 
     assert_eq!(sk.public_key(), pk);
 
-    #[cfg(features = "std")]
+    #[cfg(feature = "std")]
     {
         let sk_pem2 = sk.to_pem();
         let pk_pem2 = pk.to_pem();
