@@ -13,6 +13,7 @@
 //! Example usage:
 //!
 //! ```rust
+//! # #[cfg(feature = "random")] {
 //! use ed25519_compact::*;
 //!
 //! // A message to sign and verify.
@@ -40,6 +41,7 @@
 //! // All these structures can be viewed as raw bytes simply by dereferencing them:
 //! let signature_as_bytes: &[u8] = signature.as_ref();
 //! println!("Signature as bytes: {:?}", signature_as_bytes);
+//! # }
 //! ```
 //!
 //! ## Incremental API example usage
@@ -48,6 +50,7 @@
 //! handle large messages without using much memory:
 //!
 //! ```rust
+//! # #[cfg(feature = "random")] {
 //! use ed25519_compact::*;
 //!
 //! /// Creates a new key pair.
@@ -68,6 +71,7 @@
 //! st.absorb("mess");
 //! st.absorb("age");
 //! assert!(st.verify().is_ok());
+//! # }
 //! ```
 //!
 //! Cargo features:

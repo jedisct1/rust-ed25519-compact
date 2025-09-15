@@ -862,7 +862,7 @@ mod blind_keys {
 pub use blind_keys::*;
 
 #[test]
-#[cfg(feature = "blind-keys")]
+#[cfg(all(feature = "blind-keys", feature = "random"))]
 fn test_blind_ed25519() {
     use ct_codecs::{Decoder, Hex};
 
@@ -918,6 +918,7 @@ fn test_blind_ed25519() {
         None).unwrap(), signature.as_ref());
 }
 
+#[cfg(feature = "random")]
 #[test]
 fn test_streaming() {
     let kp = KeyPair::generate();
