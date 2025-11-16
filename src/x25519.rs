@@ -309,6 +309,7 @@ mod from_ed25519 {
 }
 
 #[cfg(not(feature = "disable-signatures"))]
+#[allow(unused)]
 pub use from_ed25519::*;
 
 #[test]
