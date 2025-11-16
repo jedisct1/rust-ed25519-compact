@@ -247,7 +247,7 @@ impl KeyPair {
     #[cfg(feature = "random")]
     pub fn generate() -> KeyPair {
         let mut sk = [0u8; SecretKey::BYTES];
-        getrandom::getrandom(&mut sk).expect("getrandom");
+        getrandom::fill(&mut sk).expect("getrandom");
         if Fe::from_bytes(&sk).is_zero() {
             panic!("All-zero secret key");
         }

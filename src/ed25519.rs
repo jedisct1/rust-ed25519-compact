@@ -517,7 +517,7 @@ impl Default for Noise {
     /// Generates random noise.
     fn default() -> Self {
         let mut noise = [0u8; Noise::BYTES];
-        getrandom::getrandom(&mut noise).expect("RNG failure");
+        getrandom::fill(&mut noise).expect("RNG failure");
         Noise(noise)
     }
 }
@@ -629,7 +629,7 @@ mod blind_keys {
         /// Generates a random blind.
         fn default() -> Self {
             let mut blind = [0u8; Blind::BYTES];
-            getrandom::getrandom(&mut blind).expect("RNG failure");
+            getrandom::fill(&mut blind).expect("RNG failure");
             Blind(blind)
         }
     }
