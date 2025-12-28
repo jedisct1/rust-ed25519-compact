@@ -103,7 +103,7 @@ impl SecretKey {
 
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        Mem::wipe(self.0)
+        Mem::wipe(&mut self.0)
     }
 }
 
@@ -202,7 +202,7 @@ pub struct VerifyingState {
 
 impl Drop for VerifyingState {
     fn drop(&mut self) {
-        Mem::wipe(self.signature.0);
+        Mem::wipe(&mut self.signature.0);
     }
 }
 
@@ -280,8 +280,8 @@ pub struct SigningState {
 
 impl Drop for SigningState {
     fn drop(&mut self) {
-        Mem::wipe(self.az);
-        Mem::wipe(self.nonce);
+        Mem::wipe(&mut self.az);
+        Mem::wipe(&mut self.nonce);
     }
 }
 
@@ -489,7 +489,7 @@ impl Noise {
     pub fn from_slice(noise: &[u8]) -> Result<Self, Error> {
         let mut noise_ = [0u8; Noise::BYTES];
         if noise.len() != noise_.len() {
-            return Err(Error::InvalidSeed);
+            return Err(Error::InvalidNoise);
         }
         noise_.copy_from_slice(noise);
         Ok(Noise::new(noise_))
@@ -620,7 +620,7 @@ mod blind_keys {
 
     impl Drop for Blind {
         fn drop(&mut self) {
-            Mem::wipe(self.0)
+            Mem::wipe(&mut self.0)
         }
     }
 
@@ -797,8 +797,8 @@ mod blind_keys {
 
     impl Drop for BlindSecretKey {
         fn drop(&mut self) {
-            Mem::wipe(self.prefix);
-            Mem::wipe(self.blind_scalar);
+            Mem::wipe(&mut self.prefix);
+            Mem::wipe(&mut self.blind_scalar);
         }
     }
 

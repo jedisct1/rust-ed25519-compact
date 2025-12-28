@@ -48,7 +48,7 @@ impl From<DHOutput> for SecretKey {
 
 impl Drop for DHOutput {
     fn drop(&mut self) {
-        Mem::wipe(self.0)
+        Mem::wipe(&mut self.0)
     }
 }
 
@@ -213,7 +213,7 @@ impl SecretKey {
 
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        Mem::wipe(self.0)
+        Mem::wipe(&mut self.0)
     }
 }
 

@@ -34,8 +34,8 @@ impl Seed {
     }
 
     /// Tentatively overwrite the content of the seed with zeros.
-    pub fn wipe(self) {
-        Mem::wipe(self.0)
+    pub fn wipe(&mut self) {
+        Mem::wipe(&mut self.0)
     }
 }
 
@@ -77,8 +77,7 @@ pub(crate) struct Mem;
 
 impl Mem {
     #[inline]
-    pub fn wipe<T: Default>(mut x: impl AsMut<[T]>) {
-        let x = x.as_mut();
+    pub fn wipe<T: Default>(x: &mut [T]) {
         for i in 0..x.len() {
             unsafe {
                 ptr::write_volatile(x.as_mut_ptr().add(i), T::default());
