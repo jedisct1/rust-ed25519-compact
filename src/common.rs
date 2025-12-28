@@ -34,7 +34,13 @@ impl Seed {
     }
 
     /// Tentatively overwrite the content of the seed with zeros.
-    pub fn wipe(&mut self) {
+    pub fn wipe(self) {
+        let mut seed = self;
+        Mem::wipe(&mut seed.0)
+    }
+
+    /// Overwrite the content of the seed with zeros in-place.
+    pub fn wipe_mut(&mut self) {
         Mem::wipe(&mut self.0)
     }
 }
