@@ -21,7 +21,7 @@ impl PublicKey {
     pub const BYTES: usize = 32;
 
     /// Creates a public key from raw bytes.
-    pub fn new(pk: [u8; PublicKey::BYTES]) -> Self {
+    pub const fn new(pk: [u8; PublicKey::BYTES]) -> Self {
         PublicKey(pk)
     }
 
@@ -61,7 +61,7 @@ impl SecretKey {
     pub const BYTES: usize = 32 + PublicKey::BYTES;
 
     /// Creates a secret key from raw bytes.
-    pub fn new(sk: [u8; SecretKey::BYTES]) -> Self {
+    pub const fn new(sk: [u8; SecretKey::BYTES]) -> Self {
         SecretKey(sk)
     }
 
@@ -161,7 +161,7 @@ impl Signature {
     pub const BYTES: usize = 64;
 
     /// Creates a signature from raw bytes.
-    pub fn new(bytes: [u8; Signature::BYTES]) -> Self {
+    pub const fn new(bytes: [u8; Signature::BYTES]) -> Self {
         Signature(bytes)
     }
 
@@ -481,7 +481,7 @@ impl Noise {
     pub const BYTES: usize = 16;
 
     /// Creates a new noise component from raw bytes.
-    pub fn new(noise: [u8; Noise::BYTES]) -> Self {
+    pub const fn new(noise: [u8; Noise::BYTES]) -> Self {
         Noise(noise)
     }
 
@@ -603,7 +603,7 @@ mod blind_keys {
         pub const BYTES: usize = 32;
 
         /// Creates a blind from raw bytes.
-        pub fn new(blind: [u8; Blind::BYTES]) -> Self {
+        pub const fn new(blind: [u8; Blind::BYTES]) -> Self {
             Blind(blind)
         }
 
@@ -683,7 +683,7 @@ mod blind_keys {
         pub const BYTES: usize = PublicKey::BYTES;
 
         /// Creates a blind public key from raw bytes.
-        pub fn new(bpk: [u8; PublicKey::BYTES]) -> Self {
+        pub const fn new(bpk: [u8; PublicKey::BYTES]) -> Self {
             BlindPublicKey(bpk)
         }
 
