@@ -35,19 +35,19 @@ pub fn fiat_25519_subborrowx_u51(
     arg2: u64,
     arg3: u64,
 ) {
-    let x1: i64 = ((((((arg2 as i128).wrapping_sub((arg1 as i128))) as i64) as i128)
-        .wrapping_sub((arg3 as i128))) as i64);
+    let x1: i64 = ((((((arg2 as i128).wrapping_sub(arg1 as i128)) as i64) as i128)
+        .wrapping_sub(arg3 as i128)) as i64);
     let x2: fiat_25519_i1 = ((x1 >> 51) as fiat_25519_i1);
     let x3: u64 = (((x1 as i128) & 0x7ffffffffffff_i128) as u64);
     *out1 = x3;
-    *out2 = ((0x0_i8.wrapping_sub((x2 as fiat_25519_i2))) as fiat_25519_u1);
+    *out2 = ((0x0_i8.wrapping_sub(x2 as fiat_25519_i2)) as fiat_25519_u1);
 }
 
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_cmovznz_u64(out1: &mut u64, arg1: fiat_25519_u1, arg2: u64, arg3: u64) {
     let x1: fiat_25519_u1 = (!(!arg1));
-    let x2: u64 = (((((0x0_i8.wrapping_sub((x1 as fiat_25519_i2))) as fiat_25519_i1) as i128)
+    let x2: u64 = (((((0x0_i8.wrapping_sub(x1 as fiat_25519_i2)) as fiat_25519_i1) as i128)
         & 0xffffffffffffffff_i128) as u64);
     let x3: u64 = ((x2 & arg3) | ((!x2) & arg2));
     *out1 = x3;
@@ -56,43 +56,43 @@ pub fn fiat_25519_cmovznz_u64(out1: &mut u64, arg1: fiat_25519_u1, arg2: u64, ar
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
-    let x1: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[4]).wrapping_mul(0x13)) as u128)));
-    let x2: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[3]).wrapping_mul(0x13)) as u128)));
-    let x3: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[2]).wrapping_mul(0x13)) as u128)));
-    let x4: u128 = (((arg1[4]) as u128).wrapping_mul((((arg2[1]).wrapping_mul(0x13)) as u128)));
-    let x5: u128 = (((arg1[3]) as u128).wrapping_mul((((arg2[4]).wrapping_mul(0x13)) as u128)));
-    let x6: u128 = (((arg1[3]) as u128).wrapping_mul((((arg2[3]).wrapping_mul(0x13)) as u128)));
-    let x7: u128 = (((arg1[3]) as u128).wrapping_mul((((arg2[2]).wrapping_mul(0x13)) as u128)));
-    let x8: u128 = (((arg1[2]) as u128).wrapping_mul((((arg2[4]).wrapping_mul(0x13)) as u128)));
-    let x9: u128 = (((arg1[2]) as u128).wrapping_mul((((arg2[3]).wrapping_mul(0x13)) as u128)));
-    let x10: u128 = (((arg1[1]) as u128).wrapping_mul((((arg2[4]).wrapping_mul(0x13)) as u128)));
-    let x11: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[0]) as u128)));
-    let x12: u128 = (((arg1[3]) as u128).wrapping_mul(((arg2[1]) as u128)));
-    let x13: u128 = (((arg1[3]) as u128).wrapping_mul(((arg2[0]) as u128)));
-    let x14: u128 = (((arg1[2]) as u128).wrapping_mul(((arg2[2]) as u128)));
-    let x15: u128 = (((arg1[2]) as u128).wrapping_mul(((arg2[1]) as u128)));
-    let x16: u128 = (((arg1[2]) as u128).wrapping_mul(((arg2[0]) as u128)));
-    let x17: u128 = (((arg1[1]) as u128).wrapping_mul(((arg2[3]) as u128)));
-    let x18: u128 = (((arg1[1]) as u128).wrapping_mul(((arg2[2]) as u128)));
-    let x19: u128 = (((arg1[1]) as u128).wrapping_mul(((arg2[1]) as u128)));
-    let x20: u128 = (((arg1[1]) as u128).wrapping_mul(((arg2[0]) as u128)));
-    let x21: u128 = (((arg1[0]) as u128).wrapping_mul(((arg2[4]) as u128)));
-    let x22: u128 = (((arg1[0]) as u128).wrapping_mul(((arg2[3]) as u128)));
-    let x23: u128 = (((arg1[0]) as u128).wrapping_mul(((arg2[2]) as u128)));
-    let x24: u128 = (((arg1[0]) as u128).wrapping_mul(((arg2[1]) as u128)));
-    let x25: u128 = (((arg1[0]) as u128).wrapping_mul(((arg2[0]) as u128)));
+    let x1: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[4]).wrapping_mul(0x13)) as u128));
+    let x2: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[3]).wrapping_mul(0x13)) as u128));
+    let x3: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[2]).wrapping_mul(0x13)) as u128));
+    let x4: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[1]).wrapping_mul(0x13)) as u128));
+    let x5: u128 = (((arg1[3]) as u128).wrapping_mul(((arg2[4]).wrapping_mul(0x13)) as u128));
+    let x6: u128 = (((arg1[3]) as u128).wrapping_mul(((arg2[3]).wrapping_mul(0x13)) as u128));
+    let x7: u128 = (((arg1[3]) as u128).wrapping_mul(((arg2[2]).wrapping_mul(0x13)) as u128));
+    let x8: u128 = (((arg1[2]) as u128).wrapping_mul(((arg2[4]).wrapping_mul(0x13)) as u128));
+    let x9: u128 = (((arg1[2]) as u128).wrapping_mul(((arg2[3]).wrapping_mul(0x13)) as u128));
+    let x10: u128 = (((arg1[1]) as u128).wrapping_mul(((arg2[4]).wrapping_mul(0x13)) as u128));
+    let x11: u128 = (((arg1[4]) as u128).wrapping_mul((arg2[0]) as u128));
+    let x12: u128 = (((arg1[3]) as u128).wrapping_mul((arg2[1]) as u128));
+    let x13: u128 = (((arg1[3]) as u128).wrapping_mul((arg2[0]) as u128));
+    let x14: u128 = (((arg1[2]) as u128).wrapping_mul((arg2[2]) as u128));
+    let x15: u128 = (((arg1[2]) as u128).wrapping_mul((arg2[1]) as u128));
+    let x16: u128 = (((arg1[2]) as u128).wrapping_mul((arg2[0]) as u128));
+    let x17: u128 = (((arg1[1]) as u128).wrapping_mul((arg2[3]) as u128));
+    let x18: u128 = (((arg1[1]) as u128).wrapping_mul((arg2[2]) as u128));
+    let x19: u128 = (((arg1[1]) as u128).wrapping_mul((arg2[1]) as u128));
+    let x20: u128 = (((arg1[1]) as u128).wrapping_mul((arg2[0]) as u128));
+    let x21: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[4]) as u128));
+    let x22: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[3]) as u128));
+    let x23: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[2]) as u128));
+    let x24: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[1]) as u128));
+    let x25: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[0]) as u128));
     let x26: u128 =
-        (x25.wrapping_add((x10.wrapping_add((x9.wrapping_add((x7.wrapping_add(x4))))))));
+        (x25.wrapping_add(x10.wrapping_add(x9.wrapping_add(x7.wrapping_add(x4)))));
     let x27: u64 = ((x26 >> 51) as u64);
     let x28: u64 = ((x26 & 0x7ffffffffffff_u128) as u64);
     let x29: u128 =
-        (x21.wrapping_add((x17.wrapping_add((x14.wrapping_add((x12.wrapping_add(x11))))))));
+        (x21.wrapping_add(x17.wrapping_add(x14.wrapping_add(x12.wrapping_add(x11)))));
     let x30: u128 =
-        (x22.wrapping_add((x18.wrapping_add((x15.wrapping_add((x13.wrapping_add(x1))))))));
+        (x22.wrapping_add(x18.wrapping_add(x15.wrapping_add(x13.wrapping_add(x1)))));
     let x31: u128 =
-        (x23.wrapping_add((x19.wrapping_add((x16.wrapping_add((x5.wrapping_add(x2))))))));
+        (x23.wrapping_add(x19.wrapping_add(x16.wrapping_add(x5.wrapping_add(x2)))));
     let x32: u128 =
-        (x24.wrapping_add((x20.wrapping_add((x8.wrapping_add((x6.wrapping_add(x3))))))));
+        (x24.wrapping_add(x20.wrapping_add(x8.wrapping_add(x6.wrapping_add(x3)))));
     let x33: u128 = ((x27 as u128).wrapping_add(x32));
     let x34: u64 = ((x33 >> 51) as u64);
     let x35: u64 = ((x33 & 0x7ffffffffffff_u128) as u64);
@@ -131,28 +131,28 @@ pub fn fiat_25519_carry_square(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x6: u64 = ((arg1[3]).wrapping_mul(0x2));
     let x7: u64 = ((arg1[2]).wrapping_mul(0x2));
     let x8: u64 = ((arg1[1]).wrapping_mul(0x2));
-    let x9: u128 = (((arg1[4]) as u128).wrapping_mul((x1 as u128)));
-    let x10: u128 = (((arg1[3]) as u128).wrapping_mul((x2 as u128)));
-    let x11: u128 = (((arg1[3]) as u128).wrapping_mul((x4 as u128)));
-    let x12: u128 = (((arg1[2]) as u128).wrapping_mul((x2 as u128)));
-    let x13: u128 = (((arg1[2]) as u128).wrapping_mul((x5 as u128)));
-    let x14: u128 = (((arg1[2]) as u128).wrapping_mul(((arg1[2]) as u128)));
-    let x15: u128 = (((arg1[1]) as u128).wrapping_mul((x2 as u128)));
-    let x16: u128 = (((arg1[1]) as u128).wrapping_mul((x6 as u128)));
-    let x17: u128 = (((arg1[1]) as u128).wrapping_mul((x7 as u128)));
-    let x18: u128 = (((arg1[1]) as u128).wrapping_mul(((arg1[1]) as u128)));
-    let x19: u128 = (((arg1[0]) as u128).wrapping_mul((x3 as u128)));
-    let x20: u128 = (((arg1[0]) as u128).wrapping_mul((x6 as u128)));
-    let x21: u128 = (((arg1[0]) as u128).wrapping_mul((x7 as u128)));
-    let x22: u128 = (((arg1[0]) as u128).wrapping_mul((x8 as u128)));
-    let x23: u128 = (((arg1[0]) as u128).wrapping_mul(((arg1[0]) as u128)));
-    let x24: u128 = (x23.wrapping_add((x15.wrapping_add(x13))));
+    let x9: u128 = (((arg1[4]) as u128).wrapping_mul(x1 as u128));
+    let x10: u128 = (((arg1[3]) as u128).wrapping_mul(x2 as u128));
+    let x11: u128 = (((arg1[3]) as u128).wrapping_mul(x4 as u128));
+    let x12: u128 = (((arg1[2]) as u128).wrapping_mul(x2 as u128));
+    let x13: u128 = (((arg1[2]) as u128).wrapping_mul(x5 as u128));
+    let x14: u128 = (((arg1[2]) as u128).wrapping_mul((arg1[2]) as u128));
+    let x15: u128 = (((arg1[1]) as u128).wrapping_mul(x2 as u128));
+    let x16: u128 = (((arg1[1]) as u128).wrapping_mul(x6 as u128));
+    let x17: u128 = (((arg1[1]) as u128).wrapping_mul(x7 as u128));
+    let x18: u128 = (((arg1[1]) as u128).wrapping_mul((arg1[1]) as u128));
+    let x19: u128 = (((arg1[0]) as u128).wrapping_mul(x3 as u128));
+    let x20: u128 = (((arg1[0]) as u128).wrapping_mul(x6 as u128));
+    let x21: u128 = (((arg1[0]) as u128).wrapping_mul(x7 as u128));
+    let x22: u128 = (((arg1[0]) as u128).wrapping_mul(x8 as u128));
+    let x23: u128 = (((arg1[0]) as u128).wrapping_mul((arg1[0]) as u128));
+    let x24: u128 = (x23.wrapping_add(x15.wrapping_add(x13)));
     let x25: u64 = ((x24 >> 51) as u64);
     let x26: u64 = ((x24 & 0x7ffffffffffff_u128) as u64);
-    let x27: u128 = (x19.wrapping_add((x16.wrapping_add(x14))));
-    let x28: u128 = (x20.wrapping_add((x17.wrapping_add(x9))));
-    let x29: u128 = (x21.wrapping_add((x18.wrapping_add(x10))));
-    let x30: u128 = (x22.wrapping_add((x12.wrapping_add(x11))));
+    let x27: u128 = (x19.wrapping_add(x16.wrapping_add(x14)));
+    let x28: u128 = (x20.wrapping_add(x17.wrapping_add(x9)));
+    let x29: u128 = (x21.wrapping_add(x18.wrapping_add(x10)));
+    let x30: u128 = (x22.wrapping_add(x12.wrapping_add(x11)));
     let x31: u128 = ((x25 as u128).wrapping_add(x30));
     let x32: u64 = ((x31 >> 51) as u64);
     let x33: u64 = ((x31 & 0x7ffffffffffff_u128) as u64);
@@ -184,15 +184,15 @@ pub fn fiat_25519_carry_square(out1: &mut [u64; 5], arg1: &[u64; 5]) {
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_carry(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x1: u64 = (arg1[0]);
-    let x2: u64 = ((x1 >> 51).wrapping_add((arg1[1])));
-    let x3: u64 = ((x2 >> 51).wrapping_add((arg1[2])));
-    let x4: u64 = ((x3 >> 51).wrapping_add((arg1[3])));
-    let x5: u64 = ((x4 >> 51).wrapping_add((arg1[4])));
-    let x6: u64 = ((x1 & 0x7ffffffffffff).wrapping_add(((x5 >> 51).wrapping_mul(0x13))));
-    let x7: u64 = ((((x6 >> 51) as fiat_25519_u1) as u64).wrapping_add((x2 & 0x7ffffffffffff)));
+    let x2: u64 = ((x1 >> 51).wrapping_add(arg1[1]));
+    let x3: u64 = ((x2 >> 51).wrapping_add(arg1[2]));
+    let x4: u64 = ((x3 >> 51).wrapping_add(arg1[3]));
+    let x5: u64 = ((x4 >> 51).wrapping_add(arg1[4]));
+    let x6: u64 = ((x1 & 0x7ffffffffffff).wrapping_add((x5 >> 51).wrapping_mul(0x13)));
+    let x7: u64 = ((((x6 >> 51) as fiat_25519_u1) as u64).wrapping_add(x2 & 0x7ffffffffffff));
     let x8: u64 = (x6 & 0x7ffffffffffff);
     let x9: u64 = (x7 & 0x7ffffffffffff);
-    let x10: u64 = ((((x7 >> 51) as fiat_25519_u1) as u64).wrapping_add((x3 & 0x7ffffffffffff)));
+    let x10: u64 = ((((x7 >> 51) as fiat_25519_u1) as u64).wrapping_add(x3 & 0x7ffffffffffff));
     let x11: u64 = (x4 & 0x7ffffffffffff);
     let x12: u64 = (x5 & 0x7ffffffffffff);
     out1[0] = x8;
@@ -205,11 +205,11 @@ pub fn fiat_25519_carry(out1: &mut [u64; 5], arg1: &[u64; 5]) {
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_add(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
-    let x1: u64 = ((arg1[0]).wrapping_add((arg2[0])));
-    let x2: u64 = ((arg1[1]).wrapping_add((arg2[1])));
-    let x3: u64 = ((arg1[2]).wrapping_add((arg2[2])));
-    let x4: u64 = ((arg1[3]).wrapping_add((arg2[3])));
-    let x5: u64 = ((arg1[4]).wrapping_add((arg2[4])));
+    let x1: u64 = ((arg1[0]).wrapping_add(arg2[0]));
+    let x2: u64 = ((arg1[1]).wrapping_add(arg2[1]));
+    let x3: u64 = ((arg1[2]).wrapping_add(arg2[2]));
+    let x4: u64 = ((arg1[3]).wrapping_add(arg2[3]));
+    let x5: u64 = ((arg1[4]).wrapping_add(arg2[4]));
     out1[0] = x1;
     out1[1] = x2;
     out1[2] = x3;
@@ -220,11 +220,11 @@ pub fn fiat_25519_add(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_sub(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
-    let x1: u64 = ((0xfffffffffffdau64.wrapping_add((arg1[0]))).wrapping_sub((arg2[0])));
-    let x2: u64 = ((0xffffffffffffeu64.wrapping_add((arg1[1]))).wrapping_sub((arg2[1])));
-    let x3: u64 = ((0xffffffffffffeu64.wrapping_add((arg1[2]))).wrapping_sub((arg2[2])));
-    let x4: u64 = ((0xffffffffffffeu64.wrapping_add((arg1[3]))).wrapping_sub((arg2[3])));
-    let x5: u64 = ((0xffffffffffffeu64.wrapping_add((arg1[4]))).wrapping_sub((arg2[4])));
+    let x1: u64 = ((0xfffffffffffdau64.wrapping_add(arg1[0])).wrapping_sub(arg2[0]));
+    let x2: u64 = ((0xffffffffffffeu64.wrapping_add(arg1[1])).wrapping_sub(arg2[1]));
+    let x3: u64 = ((0xffffffffffffeu64.wrapping_add(arg1[2])).wrapping_sub(arg2[2]));
+    let x4: u64 = ((0xffffffffffffeu64.wrapping_add(arg1[3])).wrapping_sub(arg2[3]));
+    let x5: u64 = ((0xffffffffffffeu64.wrapping_add(arg1[4])).wrapping_sub(arg2[4]));
     out1[0] = x1;
     out1[1] = x2;
     out1[2] = x3;
@@ -235,11 +235,11 @@ pub fn fiat_25519_sub(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 pub fn fiat_25519_opp(out1: &mut [u64; 5], arg1: &[u64; 5]) {
-    let x1: u64 = (0xfffffffffffdau64.wrapping_sub((arg1[0])));
-    let x2: u64 = (0xffffffffffffeu64.wrapping_sub((arg1[1])));
-    let x3: u64 = (0xffffffffffffeu64.wrapping_sub((arg1[2])));
-    let x4: u64 = (0xffffffffffffeu64.wrapping_sub((arg1[3])));
-    let x5: u64 = (0xffffffffffffeu64.wrapping_sub((arg1[4])));
+    let x1: u64 = (0xfffffffffffdau64.wrapping_sub(arg1[0]));
+    let x2: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[1]));
+    let x3: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[2]));
+    let x4: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[3]));
+    let x5: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[4]));
     out1[0] = x1;
     out1[1] = x2;
     out1[2] = x3;
@@ -321,7 +321,7 @@ pub fn fiat_25519_to_bytes(out1: &mut [u8; 32], arg1: &[u64; 5]) {
     let x35: u64 = (x33 >> 8);
     let x36: u8 = ((x35 & 0xff_u64) as u8);
     let x37: u8 = ((x35 >> 8) as u8);
-    let x38: u64 = (x25.wrapping_add((x37 as u64)));
+    let x38: u64 = (x25.wrapping_add(x37 as u64));
     let x39: u8 = ((x38 & 0xff_u64) as u8);
     let x40: u64 = (x38 >> 8);
     let x41: u8 = ((x40 & 0xff_u64) as u8);
@@ -334,7 +334,7 @@ pub fn fiat_25519_to_bytes(out1: &mut [u8; 32], arg1: &[u64; 5]) {
     let x48: u64 = (x46 >> 8);
     let x49: u8 = ((x48 & 0xff_u64) as u8);
     let x50: u8 = ((x48 >> 8) as u8);
-    let x51: u64 = (x24.wrapping_add((x50 as u64)));
+    let x51: u64 = (x24.wrapping_add(x50 as u64));
     let x52: u8 = ((x51 & 0xff_u64) as u8);
     let x53: u64 = (x51 >> 8);
     let x54: u8 = ((x53 & 0xff_u64) as u8);
@@ -349,7 +349,7 @@ pub fn fiat_25519_to_bytes(out1: &mut [u8; 32], arg1: &[u64; 5]) {
     let x63: u64 = (x61 >> 8);
     let x64: u8 = ((x63 & 0xff_u64) as u8);
     let x65: fiat_25519_u1 = ((x63 >> 8) as fiat_25519_u1);
-    let x66: u64 = (x23.wrapping_add((x65 as u64)));
+    let x66: u64 = (x23.wrapping_add(x65 as u64));
     let x67: u8 = ((x66 & 0xff_u64) as u8);
     let x68: u64 = (x66 >> 8);
     let x69: u8 = ((x68 & 0xff_u64) as u8);
@@ -362,7 +362,7 @@ pub fn fiat_25519_to_bytes(out1: &mut [u8; 32], arg1: &[u64; 5]) {
     let x76: u64 = (x74 >> 8);
     let x77: u8 = ((x76 & 0xff_u64) as u8);
     let x78: u8 = ((x76 >> 8) as u8);
-    let x79: u64 = (x22.wrapping_add((x78 as u64)));
+    let x79: u64 = (x22.wrapping_add(x78 as u64));
     let x80: u8 = ((x79 & 0xff_u64) as u8);
     let x81: u64 = (x79 >> 8);
     let x82: u8 = ((x81 & 0xff_u64) as u8);
