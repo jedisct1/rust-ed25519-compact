@@ -3,3 +3,4 @@
 /target
 Cargo.lock
 src/ex25519.rs
+.swival
