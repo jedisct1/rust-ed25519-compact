@@ -110,7 +110,7 @@
 mod common;
 mod error;
 mod field25519;
-mod sha512;
+pub mod sha512;
 
 pub use crate::common::*;
 pub use crate::error::*;
