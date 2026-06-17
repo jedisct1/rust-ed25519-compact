@@ -100,6 +100,8 @@ impl PublicKey {
         Ok(DHOutput(self.ladder(&sk.0, 256)?))
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn ladder(&self, s: &[u8], bits: usize) -> Result<[u8; POINT_BYTES], Error> {
         let x1 = Fe::from_bytes(&self.0);
         let mut x2 = FE_ONE;
@@ -141,7 +143,9 @@ impl PublicKey {
     /// The Curve25519 base point
     #[inline]
     pub fn base_point() -> PublicKey {
-        PublicKey(FE_CURVE25519_BASEPOINT.to_bytes())
+        let mut pk = [0u8; POINT_BYTES];
+        pk[0] = 9;
+        PublicKey(pk)
     }
 }
 
@@ -326,6 +330,40 @@ fn test_x25519() {
     let output_a = kp_b.pk.dh(&kp_a.sk).unwrap();
     let output_b = kp_a.pk.dh(&kp_b.sk).unwrap();
     assert_eq!(output_a, output_b);
+}
+
+#[test]
+fn test_x25519_rfc7748() {
+    use core::convert::TryInto;
+    use ct_codecs::{Decoder, Hex};
+
+    fn decode32(hex: &str) -> [u8; 32] {
+        Hex::decode_to_vec(hex, None).unwrap().try_into().unwrap()
+    }
+
+    let alice_sk = SecretKey::new(decode32(
+        "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a",
+    ));
+    let alice_pk = alice_sk.recover_public_key().unwrap();
+    assert_eq!(
+        &alice_pk[..],
+        &decode32("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a")
+    );
+
+    let bob_sk = SecretKey::new(decode32(
+        "5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb",
+    ));
+    let bob_pk = PublicKey::from_slice(&decode32(
+        "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
+    ))
+    .unwrap();
+    assert_eq!(bob_sk.recover_public_key().unwrap(), bob_pk);
+
+    let shared_a = bob_pk.dh(&alice_sk).unwrap();
+    let shared_b = alice_pk.dh(&bob_sk).unwrap();
+    let expected = decode32("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742");
+    assert_eq!(&shared_a[..], &expected);
+    assert_eq!(shared_a, shared_b);
 }
 
 #[cfg(not(feature = "disable-signatures"))]

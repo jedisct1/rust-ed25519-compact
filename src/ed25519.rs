@@ -276,6 +276,7 @@ pub struct SigningState {
     hasher: sha512::Hash,
     az: [u8; 64],
     nonce: [u8; 64],
+    r: [u8; 32],
 }
 
 impl Drop for SigningState {
@@ -287,18 +288,17 @@ impl Drop for SigningState {
 
 impl SigningState {
     fn new(nonce: [u8; 64], az: [u8; 64], pk_: &[u8]) -> Self {
-        let mut prefix: [u8; 64] = [0; 64];
-        let r = ge_scalarmult_base(&nonce[0..32]);
-        prefix[0..32].copy_from_slice(&r.to_bytes()[..]);
-        prefix[32..64].copy_from_slice(pk_);
+        let r = ge_scalarmult_base(&nonce[0..32]).to_bytes();
 
         let mut st = sha512::Hash::new();
-        st.update(prefix);
+        st.update(&r);
+        st.update(pk_);
 
         SigningState {
             hasher: st,
             nonce,
             az,
+            r,
         }
     }
 
@@ -310,8 +310,7 @@ impl SigningState {
     /// Computes the signature and return it.
     pub fn sign(&self) -> Signature {
         let mut signature: [u8; 64] = [0; 64];
-        let r = ge_scalarmult_base(&self.nonce[0..32]);
-        signature[0..32].copy_from_slice(&r.to_bytes()[..]);
+        signature[0..32].copy_from_slice(&self.r);
         let mut hram = self.hasher.finalize();
         sc_reduce(&mut hram);
         sc_muladd(
@@ -353,6 +352,7 @@ impl SecretKey {
     /// The noise parameter is optional, but recommended in order to mitigate
     /// fault attacks.
     pub fn sign(&self, message: impl AsRef<[u8]>, noise: Option<Noise>) -> Signature {
+        let message = message.as_ref();
         let seed = &self[0..32];
         let pk = &self[32..64];
         let az: [u8; 64] = {
@@ -370,13 +370,13 @@ impl SecretKey {
             } else {
                 hasher.update(&az[32..64]);
             }
-            hasher.update(&message);
+            hasher.update(message);
             let mut hash_output = hasher.finalize();
             sc_reduce(&mut hash_output[0..64]);
             hash_output
         };
         let mut st = SigningState::new(nonce, az, pk);
-        st.absorb(&message);
+        st.absorb(message);
         let signature = st.sign();
 
         #[cfg(feature = "self-verify")]
@@ -754,15 +754,16 @@ mod blind_keys {
         /// secret key. The noise parameter is optional, but recommended
         /// in order to mitigate fault attacks.
         pub fn sign(&self, message: impl AsRef<[u8]>, noise: Option<Noise>) -> Signature {
+            let message = message.as_ref();
             let nonce = {
                 let mut hasher = sha512::Hash::new();
                 if let Some(noise) = noise {
                     hasher.update(&noise[..]);
-                    hasher.update(self.prefix);
+                    hasher.update(&self.prefix);
                 } else {
-                    hasher.update(self.prefix);
+                    hasher.update(&self.prefix);
                 }
-                hasher.update(&message);
+                hasher.update(message);
                 let mut hash_output = hasher.finalize();
                 sc_reduce(&mut hash_output[0..64]);
                 hash_output
@@ -773,7 +774,7 @@ mod blind_keys {
             signature[32..64].copy_from_slice(&self.blind_pk.0);
             let mut hasher = sha512::Hash::new();
             hasher.update(signature.as_ref());
-            hasher.update(&message);
+            hasher.update(message);
             let mut hram = hasher.finalize();
             sc_reduce(&mut hram);
             sc_muladd(
@@ -929,6 +930,7 @@ fn test_streaming() {
     st.absorb(msg1);
     st.absorb(msg2);
     let signature = st.sign();
+    assert_eq!(signature, st.sign());
 
     let msg1 = "mess";
     let msg2 = "age";

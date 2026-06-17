@@ -34,7 +34,7 @@ pub struct GePrecomp {
     xy2d: Fe,
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Eq, PartialEq)]
 pub struct GeCached {
     y_plus_x: Fe,
     y_minus_x: Fe,
@@ -43,6 +43,8 @@ pub struct GeCached {
 }
 
 impl GeCached {
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn maybe_set(&mut self, other: &GeCached, do_swap: u8) {
         self.y_plus_x.maybe_set(&other.y_plus_x, do_swap);
         self.y_minus_x.maybe_set(&other.y_minus_x, do_swap);
@@ -52,6 +54,8 @@ impl GeCached {
 }
 
 impl GeP1P1 {
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn to_p2(&self) -> GeP2 {
         GeP2 {
             x: self.x * self.t,
@@ -60,6 +64,8 @@ impl GeP1P1 {
         }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn to_p3(&self) -> GeP3 {
         GeP3 {
             x: self.x * self.t,
@@ -71,6 +77,8 @@ impl GeP1P1 {
 }
 
 impl From<GeP2> for GeP3 {
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn from(p: GeP2) -> GeP3 {
         GeP3 {
             x: p.x,
@@ -82,6 +90,8 @@ impl From<GeP2> for GeP3 {
 }
 
 impl GeP2 {
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn zero() -> GeP2 {
         GeP2 {
             x: FE_ZERO,
@@ -90,6 +100,8 @@ impl GeP2 {
         }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn dbl(&self) -> GeP1P1 {
         let xx = self.x.square();
         let yy = self.y.square();
@@ -236,6 +248,8 @@ impl GeP3 {
         })
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn to_p2(&self) -> GeP2 {
         GeP2 {
             x: self.x,
@@ -244,6 +258,8 @@ impl GeP3 {
         }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn to_cached(&self) -> GeCached {
         GeCached {
             y_plus_x: self.y + self.x,
@@ -253,6 +269,8 @@ impl GeP3 {
         }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn zero() -> GeP3 {
         GeP3 {
             x: FE_ZERO,
@@ -262,6 +280,8 @@ impl GeP3 {
         }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn dbl(&self) -> GeP1P1 {
         self.to_p2().dbl()
     }
@@ -288,6 +308,8 @@ impl GeP3 {
 impl Add<GeP3> for GeP3 {
     type Output = GeP3;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn add(self, other: GeP3) -> GeP3 {
         (self + other.to_cached()).to_p3()
     }
@@ -296,6 +318,8 @@ impl Add<GeP3> for GeP3 {
 impl Sub<GeP3> for GeP3 {
     type Output = GeP3;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sub(self, other: GeP3) -> GeP3 {
         (self - other.to_cached()).to_p3()
     }
@@ -304,6 +328,8 @@ impl Sub<GeP3> for GeP3 {
 impl Add<GeCached> for GeP3 {
     type Output = GeP1P1;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn add(self, _rhs: GeCached) -> GeP1P1 {
         let y1_plus_x1 = self.y + self.x;
         let y1_minus_x1 = self.y - self.x;
@@ -329,6 +355,8 @@ impl Add<GeCached> for GeP3 {
 impl Add<GePrecomp> for GeP3 {
     type Output = GeP1P1;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn add(self, _rhs: GePrecomp) -> GeP1P1 {
         let y1_plus_x1 = self.y + self.x;
         let y1_minus_x1 = self.y - self.x;
@@ -353,6 +381,8 @@ impl Add<GePrecomp> for GeP3 {
 impl Sub<GeCached> for GeP3 {
     type Output = GeP1P1;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sub(self, _rhs: GeCached) -> GeP1P1 {
         let y1_plus_x1 = self.y + self.x;
         let y1_minus_x1 = self.y - self.x;
@@ -378,6 +408,8 @@ impl Sub<GeCached> for GeP3 {
 impl Sub<GePrecomp> for GeP3 {
     type Output = GeP1P1;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sub(self, _rhs: GePrecomp) -> GeP1P1 {
         let y1_plus_x1 = self.y + self.x;
         let y1_minus_x1 = self.y - self.x;
@@ -399,6 +431,7 @@ impl Sub<GePrecomp> for GeP3 {
     }
 }
 
+#[cfg(any(feature = "blind-keys", feature = "opt_size", test))]
 fn ge_precompute(base: &GeP3) -> [GeCached; 16] {
     let base_cached = base.to_cached();
     let mut pc = [GeP3::zero(); 16];
@@ -417,8 +450,13 @@ fn ge_precompute(base: &GeP3) -> [GeCached; 16] {
     pc_cached
 }
 
+#[cfg(any(feature = "blind-keys", feature = "opt_size", test))]
 pub fn ge_scalarmult(scalar: &[u8], base: &GeP3) -> GeP3 {
     let pc = ge_precompute(base);
+    ge_scalarmult_precomputed(scalar, &pc)
+}
+
+fn ge_scalarmult_precomputed(scalar: &[u8], pc: &[GeCached; 16]) -> GeP3 {
     let mut q = GeP3::zero();
     let mut pos = 252;
     loop {
@@ -437,7 +475,499 @@ pub fn ge_scalarmult(scalar: &[u8], base: &GeP3) -> GeP3 {
     q
 }
 
+#[cfg(not(feature = "opt_size"))]
+static BASEPOINT_PC: [GeCached; 16] = [
+    GeCached {
+        y_plus_x: Fe([1, 0, 0, 0, 0]),
+        y_minus_x: Fe([
+            2251799813685230,
+            2251799813685247,
+            2251799813685247,
+            2251799813685247,
+            2251799813685247,
+        ]),
+        z: Fe([1, 0, 0, 0, 0]),
+        t2d: Fe([0, 0, 0, 0, 0]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            3540182452943730,
+            2497478415033846,
+            2521227595762870,
+            1462984067271729,
+            2389212253076811,
+        ]),
+        y_minus_x: Fe([
+            62697248952638,
+            204681361388450,
+            631292143396476,
+            338455783676468,
+            1213667448819585,
+        ]),
+        z: Fe([1, 0, 0, 0, 0]),
+        t2d: Fe([
+            301289933810280,
+            1259582250014073,
+            1422107436869536,
+            796239922652654,
+            1953934009299142,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2899251262813612,
+            2105814100803166,
+            1713949677790798,
+            3215891443006982,
+            2739384323378089,
+        ]),
+        y_minus_x: Fe([
+            2068674118847085,
+            1963549090372877,
+            1018819090357341,
+            202036157367742,
+            2216582574168879,
+        ]),
+        z: Fe([
+            939820407267714,
+            2244711721325457,
+            833935350215291,
+            514982476710626,
+            395358860036744,
+        ]),
+        t2d: Fe([
+            480126441932807,
+            360939894744223,
+            414963024589262,
+            1497007729610176,
+            631704639649473,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            3203379641193801,
+            2671375269558872,
+            2070381889117393,
+            3408704250464255,
+            2000447963965959,
+        ]),
+        y_minus_x: Fe([
+            904464151500333,
+            1771035278322932,
+            211167236544955,
+            1536100403113214,
+            1726723339398472,
+        ]),
+        z: Fe([
+            1061705710463460,
+            150884959185907,
+            158377546300656,
+            2007006659873485,
+            1408482789065644,
+        ]),
+        t2d: Fe([
+            1742083302726619,
+            1616172736080930,
+            1275485487654045,
+            37675288128703,
+            2095576491262187,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            1695410796818793,
+            2731695111583170,
+            2714556126557059,
+            451274161496800,
+            2012078832798171,
+        ]),
+        y_minus_x: Fe([
+            375025409391801,
+            169834297521966,
+            387980374534797,
+            334628214200116,
+            1830506172326927,
+        ]),
+        z: Fe([
+            1904279982576693,
+            1467233916658614,
+            1298643500842388,
+            324859978027951,
+            133149465829202,
+        ]),
+        t2d: Fe([
+            1995200425888795,
+            1351231165224936,
+            2176876606696969,
+            1436679290588863,
+            1709317355911061,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2926516234834723,
+            1450717128675707,
+            3397919271948925,
+            979738693950965,
+            1347227353637357,
+        ]),
+        y_minus_x: Fe([
+            1410465607609101,
+            1665000734678196,
+            803676666699956,
+            2236342313567835,
+            1245809528730440,
+        ]),
+        z: Fe([
+            882236476409592,
+            1497675105009012,
+            2181927182817440,
+            722619068391161,
+            819202421408532,
+        ]),
+        t2d: Fe([
+            546543842467106,
+            1449778946980981,
+            892502568874740,
+            2186914323197665,
+            1183292400222437,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2609877896546266,
+            1096697072067135,
+            1971135628989201,
+            3414701313108708,
+            4210899004685168,
+        ]),
+        y_minus_x: Fe([
+            599697439270285,
+            1382998135852290,
+            771968960200254,
+            1878135829456840,
+            2103521242054977,
+        ]),
+        z: Fe([
+            406273932530493,
+            1601638185061342,
+            1151347692721435,
+            1495804819323688,
+            118365337991367,
+        ]),
+        t2d: Fe([
+            783552521469343,
+            550229790668946,
+            2052808141901586,
+            1760428542905596,
+            1928764989073059,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2159545607990893,
+            3147448510622730,
+            486881527044235,
+            2248590592936728,
+            1895208328891224,
+        ]),
+        y_minus_x: Fe([
+            2186604932016262,
+            1649225228573991,
+            1873456856841000,
+            1099532248606737,
+            2213142988759011,
+        ]),
+        z: Fe([
+            960540512985497,
+            1426503578465076,
+            2188424813616240,
+            1795326679408039,
+            1607151223114465,
+        ]),
+        t2d: Fe([
+            1747734643317249,
+            743380680120617,
+            1580101169068086,
+            1087664216424501,
+            277545570925331,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            3043749755220433,
+            1938598694900172,
+            3049626199986415,
+            3047949431791564,
+            2789682914382751,
+        ]),
+        y_minus_x: Fe([
+            828387156123051,
+            243955621460461,
+            762099155843483,
+            946477271729806,
+            1701652729669002,
+        ]),
+        z: Fe([
+            207037345464830,
+            1993080251615457,
+            560932193579569,
+            999626924140364,
+            754134581836708,
+        ]),
+        t2d: Fe([
+            482766940000144,
+            33540757945105,
+            749360811823239,
+            1460340387593593,
+            1757947279433989,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2240304515960624,
+            3537386921097767,
+            2695895682995147,
+            1811157917985109,
+            2779938286529648,
+        ]),
+        y_minus_x: Fe([
+            1022781769132038,
+            585623358173500,
+            709581212592317,
+            836667937950586,
+            1408009946183497,
+        ]),
+        z: Fe([
+            1934056789485370,
+            2187228471026461,
+            79683303172571,
+            246283662803711,
+            749534771196139,
+        ]),
+        t2d: Fe([
+            540262790467214,
+            290190952004667,
+            216950454494661,
+            1630941179060970,
+            785199203470672,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            1512916939093555,
+            2992645879250201,
+            2528509081340787,
+            2131332975592474,
+            761336180782299,
+        ]),
+        y_minus_x: Fe([
+            405457505626004,
+            1019703549184813,
+            1916987915502681,
+            1839883741534417,
+            2193392785174467,
+        ]),
+        z: Fe([
+            1818564342032891,
+            1136491851523721,
+            35093607622580,
+            1441385653535882,
+            732801009348817,
+        ]),
+        t2d: Fe([
+            253284364260683,
+            1123031426303723,
+            1341521644054804,
+            1010135543336479,
+            1479524374320333,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2365398187489437,
+            1124628442973815,
+            2499161664361135,
+            1471589956131712,
+            1510258093099827,
+        ]),
+        y_minus_x: Fe([
+            905705748835765,
+            1202252692568785,
+            1536609018933038,
+            1804479828235729,
+            308758094835482,
+        ]),
+        z: Fe([
+            260719394240982,
+            249358397423578,
+            1898576669281045,
+            1319825585617897,
+            2203484913493586,
+        ]),
+        t2d: Fe([
+            1074592667060695,
+            2190819092840175,
+            1113659602279329,
+            514588423576764,
+            1594850183602973,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            363425857861601,
+            1734418183714081,
+            4179723901978219,
+            2926060052259184,
+            3820257750753629,
+        ]),
+        y_minus_x: Fe([
+            2088069355629081,
+            2131073356111154,
+            273789259070562,
+            1547386807830052,
+            3563777439570,
+        ]),
+        z: Fe([
+            207103967810401,
+            768727957346634,
+            718644737663762,
+            1362212140629448,
+            1529120863451279,
+        ]),
+        t2d: Fe([
+            989664194820699,
+            1717065545893193,
+            1514630822111268,
+            1510465000922594,
+            411575651130149,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2431640481383299,
+            3535729509476129,
+            3035644312764025,
+            2313551322106050,
+            2935089592225046,
+        ]),
+        y_minus_x: Fe([
+            765935297493716,
+            649629965652465,
+            1104455927412399,
+            95176349810862,
+            1242329781295592,
+        ]),
+        z: Fe([
+            2250000172488624,
+            1617330080438570,
+            1107263496438848,
+            2112155113306328,
+            980993448222351,
+        ]),
+        t2d: Fe([
+            862537504556532,
+            566266187869470,
+            2038862002856850,
+            803960893275491,
+            1297159503099026,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2315993817135055,
+            2652722761171029,
+            2522401301012109,
+            1075741408880579,
+            1706513857602015,
+        ]),
+        y_minus_x: Fe([
+            311097472864451,
+            1284388470688736,
+            1100455435689831,
+            1913025024780403,
+            1582956969378808,
+        ]),
+        z: Fe([
+            1081431594790383,
+            1952209085138192,
+            1101000417182974,
+            1343359737131623,
+            837835975770184,
+        ]),
+        t2d: Fe([
+            1468367993771685,
+            1651387822379794,
+            2229056712608003,
+            1415674651251816,
+            903055878175404,
+        ]),
+    },
+    GeCached {
+        y_plus_x: Fe([
+            2597095379176553,
+            3281739572249654,
+            3002841564715431,
+            204337338762971,
+            578630945781619,
+        ]),
+        y_minus_x: Fe([
+            168655884267790,
+            1669918081707416,
+            420990948374884,
+            2141888286050751,
+            2040850418048232,
+        ]),
+        z: Fe([
+            684290857876024,
+            657789607835756,
+            1569561823708010,
+            1217543024068483,
+            2219703400977787,
+        ]),
+        t2d: Fe([
+            900369721197708,
+            875098376162073,
+            666599403867478,
+            1595664697968551,
+            990948962180400,
+        ]),
+    },
+];
+
 pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
+    #[cfg(not(feature = "opt_size"))]
+    {
+        return ge_scalarmult_precomputed(scalar, &BASEPOINT_PC);
+    }
+
+    #[cfg(feature = "opt_size")]
+    {
+        const BXP: [u8; 32] = [
+            0x1a, 0xd5, 0x25, 0x8f, 0x60, 0x2d, 0x56, 0xc9, 0xb2, 0xa7, 0x25, 0x95, 0x60, 0xc7,
+            0x2c, 0x69, 0x5c, 0xdc, 0xd6, 0xfd, 0x31, 0xe2, 0xa4, 0xc0, 0xfe, 0x53, 0x6e, 0xcd,
+            0xd3, 0x36, 0x69, 0x21,
+        ];
+        const BYP: [u8; 32] = [
+            0x58, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
+            0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66,
+            0x66, 0x66, 0x66, 0x66,
+        ];
+        let bx = Fe::from_bytes(&BXP);
+        let by = Fe::from_bytes(&BYP);
+        let base = GeP3 {
+            x: bx,
+            y: by,
+            z: FE_ONE,
+            t: bx * by,
+        };
+        ge_scalarmult(scalar, &base)
+    }
+}
+
+#[cfg(all(test, not(feature = "opt_size")))]
+#[test]
+fn test_basepoint_pc_matches_runtime_precompute() {
     const BXP: [u8; 32] = [
         0x1a, 0xd5, 0x25, 0x8f, 0x60, 0x2d, 0x56, 0xc9, 0xb2, 0xa7, 0x25, 0x95, 0x60, 0xc7, 0x2c,
         0x69, 0x5c, 0xdc, 0xd6, 0xfd, 0x31, 0xe2, 0xa4, 0xc0, 0xfe, 0x53, 0x6e, 0xcd, 0xd3, 0x36,
@@ -456,7 +986,23 @@ pub fn ge_scalarmult_base(scalar: &[u8]) -> GeP3 {
         z: FE_ONE,
         t: bx * by,
     };
-    ge_scalarmult(scalar, &base)
+    assert!(BASEPOINT_PC == ge_precompute(&base));
+    for scalar in [
+        [0u8; 32],
+        [1u8; 32],
+        [42u8; 32],
+        [0xffu8; 32],
+        [
+            0x70, 0x34, 0x1d, 0x7d, 0xa2, 0x31, 0x50, 0xc3, 0x0f, 0xb8, 0x76, 0x45, 0x29, 0xc2,
+            0x17, 0xa3, 0x85, 0x1a, 0x61, 0x50, 0xb7, 0xa1, 0xda, 0x79, 0x08, 0xbe, 0x3a, 0xd6,
+            0xcc, 0x94, 0xf4, 0x03,
+        ],
+    ] {
+        assert_eq!(
+            ge_scalarmult_precomputed(&scalar, &BASEPOINT_PC).to_bytes(),
+            ge_scalarmult(&scalar, &base).to_bytes()
+        );
+    }
 }
 
 #[cfg(feature = "x25519")]

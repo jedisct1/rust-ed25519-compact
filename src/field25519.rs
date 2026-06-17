@@ -81,18 +81,13 @@ pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5
     let x23: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[2]) as u128));
     let x24: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[1]) as u128));
     let x25: u128 = (((arg1[0]) as u128).wrapping_mul((arg2[0]) as u128));
-    let x26: u128 =
-        (x25.wrapping_add(x10.wrapping_add(x9.wrapping_add(x7.wrapping_add(x4)))));
+    let x26: u128 = (x25.wrapping_add(x10.wrapping_add(x9.wrapping_add(x7.wrapping_add(x4)))));
     let x27: u64 = ((x26 >> 51) as u64);
     let x28: u64 = ((x26 & 0x7ffffffffffff_u128) as u64);
-    let x29: u128 =
-        (x21.wrapping_add(x17.wrapping_add(x14.wrapping_add(x12.wrapping_add(x11)))));
-    let x30: u128 =
-        (x22.wrapping_add(x18.wrapping_add(x15.wrapping_add(x13.wrapping_add(x1)))));
-    let x31: u128 =
-        (x23.wrapping_add(x19.wrapping_add(x16.wrapping_add(x5.wrapping_add(x2)))));
-    let x32: u128 =
-        (x24.wrapping_add(x20.wrapping_add(x8.wrapping_add(x6.wrapping_add(x3)))));
+    let x29: u128 = (x21.wrapping_add(x17.wrapping_add(x14.wrapping_add(x12.wrapping_add(x11)))));
+    let x30: u128 = (x22.wrapping_add(x18.wrapping_add(x15.wrapping_add(x13.wrapping_add(x1)))));
+    let x31: u128 = (x23.wrapping_add(x19.wrapping_add(x16.wrapping_add(x5.wrapping_add(x2)))));
+    let x32: u128 = (x24.wrapping_add(x20.wrapping_add(x8.wrapping_add(x6.wrapping_add(x3)))));
     let x33: u128 = ((x27 as u128).wrapping_add(x32));
     let x34: u64 = ((x33 >> 51) as u64);
     let x35: u64 = ((x33 & 0x7ffffffffffff_u128) as u64);
@@ -240,31 +235,6 @@ pub fn fiat_25519_opp(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x3: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[2]));
     let x4: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[3]));
     let x5: u64 = (0xffffffffffffeu64.wrapping_sub(arg1[4]));
-    out1[0] = x1;
-    out1[1] = x2;
-    out1[2] = x3;
-    out1[3] = x4;
-    out1[4] = x5;
-}
-
-#[cfg_attr(feature = "opt_size", inline(never))]
-#[cfg_attr(not(feature = "opt_size"), inline)]
-pub fn fiat_25519_selectznz(
-    out1: &mut [u64; 5],
-    arg1: fiat_25519_u1,
-    arg2: &[u64; 5],
-    arg3: &[u64; 5],
-) {
-    let mut x1: u64 = 0;
-    fiat_25519_cmovznz_u64(&mut x1, arg1, (arg2[0]), (arg3[0]));
-    let mut x2: u64 = 0;
-    fiat_25519_cmovznz_u64(&mut x2, arg1, (arg2[1]), (arg3[1]));
-    let mut x3: u64 = 0;
-    fiat_25519_cmovznz_u64(&mut x3, arg1, (arg2[2]), (arg3[2]));
-    let mut x4: u64 = 0;
-    fiat_25519_cmovznz_u64(&mut x4, arg1, (arg2[3]), (arg3[3]));
-    let mut x5: u64 = 0;
-    fiat_25519_cmovznz_u64(&mut x5, arg1, (arg2[4]), (arg3[4]));
     out1[0] = x1;
     out1[1] = x2;
     out1[2] = x3;
@@ -445,9 +415,6 @@ pub(crate) static FE_D2: Fe = Fe([
     633789495995903,
 ]);
 
-#[cfg(feature = "x25519")]
-pub(crate) static FE_CURVE25519_BASEPOINT: Fe = Fe([9, 0, 0, 0, 0]);
-
 #[cfg_attr(feature = "opt_size", inline(never))]
 #[cfg_attr(not(feature = "opt_size"), inline)]
 fn load_8u(s: &[u8]) -> u64 {
@@ -488,6 +455,8 @@ pub fn load_3i(s: &[u8]) -> i64 {
 impl Add for Fe {
     type Output = Fe;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn add(self, _rhs: Fe) -> Fe {
         let Fe(f) = self;
         let Fe(g) = _rhs;
@@ -500,6 +469,8 @@ impl Add for Fe {
 impl Sub for Fe {
     type Output = Fe;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn sub(self, _rhs: Fe) -> Fe {
         let Fe(f) = self;
         let Fe(g) = _rhs;
@@ -512,6 +483,8 @@ impl Sub for Fe {
 impl Mul for Fe {
     type Output = Fe;
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     fn mul(self, _rhs: Fe) -> Fe {
         let Fe(f) = self;
         let Fe(g) = _rhs;
@@ -536,6 +509,8 @@ impl Fe {
         h
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn to_bytes(&self) -> [u8; 32] {
         let &Fe(es) = &self.carry();
         let mut s_ = [0u8; 32];
@@ -543,20 +518,25 @@ impl Fe {
         s_
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn carry(&self) -> Fe {
         let mut h = Fe::default();
         fiat_25519_carry(&mut h.0, &self.0);
         h
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn maybe_set(&mut self, other: &Fe, do_swap: u8) {
-        let &mut Fe(f) = self;
-        let &Fe(g) = other;
-        let mut t = [0u64; 5];
-        fiat_25519_selectznz(&mut t, do_swap, &f, &g);
-        self.0 = t
+        let mask = 0u64.wrapping_sub((do_swap & 1) as u64);
+        for i in 0..5 {
+            self.0[i] ^= mask & (self.0[i] ^ other.0[i]);
+        }
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn square(&self) -> Fe {
         let &Fe(f) = &self;
         let mut h = Fe::default();
@@ -564,6 +544,8 @@ impl Fe {
         h
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn square_and_double(&self) -> Fe {
         let h = self.square();
         (h + h)
@@ -596,14 +578,20 @@ impl Fe {
         z_255_21
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn is_zero(&self) -> bool {
         self.to_bytes().iter().fold(0, |acc, x| acc | x) == 0
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn is_negative(&self) -> bool {
         (self.to_bytes()[0] & 1) != 0
     }
 
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn neg(&self) -> Fe {
         let &Fe(f) = &self;
         let mut h = Fe::default();
@@ -639,7 +627,8 @@ impl Fe {
     }
 
     #[cfg(feature = "x25519")]
-    #[inline]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn cswap2(a0: &mut Fe, b0: &mut Fe, a1: &mut Fe, b1: &mut Fe, c: u8) {
         let mask: u64 = 0u64.wrapping_sub(c as _);
         let mut x0 = *a0;
@@ -661,7 +650,8 @@ impl Fe {
     }
 
     #[cfg(feature = "x25519")]
-    #[inline]
+    #[cfg_attr(feature = "opt_size", inline(never))]
+    #[cfg_attr(not(feature = "opt_size"), inline(always))]
     pub fn mul32(&self, n: u32) -> Fe {
         let sn = n as u128;
         let mut fe = Fe::default();
