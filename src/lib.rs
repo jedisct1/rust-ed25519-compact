@@ -129,3 +129,16 @@ pub mod x25519;
 #[cfg(not(feature = "disable-signatures"))]
 #[cfg(feature = "pem")]
 mod pem;
+
+pub mod reexports {
+    pub use crate::sha512;
+
+    #[cfg(feature = "std")]
+    pub use ct_codecs;
+
+    #[cfg(feature = "random")]
+    pub use getrandom;
+
+    #[cfg(feature = "traits")]
+    pub use ed25519;
+}
