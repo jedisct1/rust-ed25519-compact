@@ -958,3 +958,17 @@ fn test_ed25519_invalid_keypair() {
     assert!(kp2.sk.validate_public_key(&kp2.pk).is_ok());
     assert!(kp1.validate().is_ok());
 }
+
+#[test]
+fn test_reject_noncanonical_identity_forgery() {
+    let mut noncanonical_identity = [0xff; PublicKey::BYTES];
+    noncanonical_identity[0] = 0xee;
+    noncanonical_identity[31] = 0x7f;
+    let pk = PublicKey::new(noncanonical_identity);
+
+    let mut forged = [0u8; Signature::BYTES];
+    forged[0] = 1;
+    let signature = Signature::new(forged);
+
+    assert!(pk.verify(b"any message", &signature).is_err());
+}

@@ -213,6 +213,10 @@ impl GeP2 {
 
 impl GeP3 {
     pub fn from_bytes_negate_vartime(s: &[u8; 32]) -> Option<GeP3> {
+        let mut encoded_y = *s;
+        encoded_y[31] &= 0x7f;
+        Fe::reject_noncanonical(&encoded_y).ok()?;
+
         let y = Fe::from_bytes(s);
         let z = FE_ONE;
         let y_squared = y.square();
@@ -232,6 +236,10 @@ impl GeP3 {
 
         if x.is_negative() == ((s[31] >> 7) != 0) {
             x = x.neg();
+        }
+
+        if x.is_zero() && s[31] >> 7 != 0 {
+            return None;
         }
 
         let t = x * y;
