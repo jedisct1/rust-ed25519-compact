@@ -53,8 +53,8 @@ pub fn fiat_25519_cmovznz_u64(out1: &mut u64, arg1: fiat_25519_u1, arg2: u64, ar
     *out1 = x3;
 }
 
-#[cfg_attr(feature = "opt_size", inline(never))]
-#[cfg_attr(not(feature = "opt_size"), inline)]
+#[cfg_attr(any(feature = "opt_size", target_arch = "wasm32"), inline(never))]
+#[cfg_attr(not(any(feature = "opt_size", target_arch = "wasm32")), inline)]
 pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5]) {
     let x1: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[4]).wrapping_mul(0x13)) as u128));
     let x2: u128 = (((arg1[4]) as u128).wrapping_mul(((arg2[3]).wrapping_mul(0x13)) as u128));
@@ -115,8 +115,8 @@ pub fn fiat_25519_carry_mul(out1: &mut [u64; 5], arg1: &[u64; 5], arg2: &[u64; 5
     out1[4] = x44;
 }
 
-#[cfg_attr(feature = "opt_size", inline(never))]
-#[cfg_attr(not(feature = "opt_size"), inline)]
+#[cfg_attr(any(feature = "opt_size", target_arch = "wasm32"), inline(never))]
+#[cfg_attr(not(any(feature = "opt_size", target_arch = "wasm32")), inline)]
 pub fn fiat_25519_carry_square(out1: &mut [u64; 5], arg1: &[u64; 5]) {
     let x1: u64 = ((arg1[4]).wrapping_mul(0x13));
     let x2: u64 = (x1.wrapping_mul(0x2));
