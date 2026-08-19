@@ -133,7 +133,7 @@ mod pem;
 pub mod reexports {
     pub use crate::sha512;
 
-    #[cfg(feature = "std")]
+    #[cfg(feature = "pem")]
     pub use ct_codecs;
 
     #[cfg(feature = "random")]
