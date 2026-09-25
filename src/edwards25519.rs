@@ -76,19 +76,6 @@ impl GeP1P1 {
     }
 }
 
-impl From<GeP2> for GeP3 {
-    #[cfg_attr(feature = "opt_size", inline(never))]
-    #[cfg_attr(not(feature = "opt_size"), inline(always))]
-    fn from(p: GeP2) -> GeP3 {
-        GeP3 {
-            x: p.x,
-            y: p.y,
-            z: p.z,
-            t: p.x * p.y,
-        }
-    }
-}
-
 impl GeP2 {
     #[cfg_attr(feature = "opt_size", inline(never))]
     #[cfg_attr(not(feature = "opt_size"), inline(always))]
@@ -154,7 +141,7 @@ impl GeP2 {
     }
 
     #[allow(clippy::comparison_chain)]
-    pub fn double_scalarmult_vartime(a_scalar: &[u8], a_point: GeP3, b_scalar: &[u8]) -> GeP2 {
+    pub fn double_scalarmult_vartime(a_scalar: &[u8], a_point: GeP3, b_scalar: &[u8]) -> GeP3 {
         let aslide = GeP2::slide(a_scalar);
         let bslide = GeP2::slide(b_scalar);
 
@@ -182,7 +169,7 @@ impl GeP2 {
                 break;
             }
             if i == 0 {
-                return r;
+                return GeP3::zero();
             }
             i -= 1;
         }
@@ -201,11 +188,10 @@ impl GeP2 {
                 t = t.to_p3() - BI[(-bslide[i] / 2) as usize];
             }
 
-            r = t.to_p2();
-
             if i == 0 {
-                return r;
+                return t.to_p3();
             }
+            r = t.to_p2();
             i -= 1;
         }
     }
@@ -303,13 +289,9 @@ impl GeP3 {
         bs
     }
 
+    // Only small-order points have x = 0 once multiplied by 4.
     pub fn has_small_order(&self) -> bool {
-        let recip = self.z.invert();
-        let x = self.x * recip;
-        let y = self.y * recip;
-        let x_neg = x.neg();
-        let y_sqrtm1 = y * FE_SQRTM1;
-        x.is_zero() | y.is_zero() | (y_sqrtm1 == x) | (y_sqrtm1 == x_neg)
+        self.dbl().to_p2().dbl().x.is_zero()
     }
 }
 
@@ -1903,15 +1885,6 @@ pub fn sc_reject_noncanonical(s: &[u8]) -> Result<(), Error> {
     }
 }
 
-pub fn is_identity(s: &[u8; 32]) -> bool {
-    let mut c = s[0] ^ 0x01;
-    for i in 1..31 {
-        c |= s[i];
-    }
-    c |= s[31] & 0x7f;
-    c == 0
-}
-
 static BI: [GePrecomp; 8] = [
     GePrecomp {
         y_plus_x: Fe([
@@ -2098,3 +2071,38 @@ static BI: [GePrecomp; 8] = [
         ]),
     },
 ];
+
+#[cfg(test)]
+pub(crate) fn small_order_points() -> [GeP3; 8] {
+    let order_8_point = GeP3::from_bytes_vartime(&[
+        0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0, 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98,
+        0xf0, 0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39, 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53,
+        0xfc, 0x05,
+    ])
+    .unwrap();
+    let mut points = [order_8_point; 8];
+    for i in 1..8 {
+        points[i] = points[i - 1] + order_8_point;
+    }
+    points
+}
+
+#[test]
+fn test_has_small_order() {
+    let mut scalar = [0u8; 32];
+    scalar[0] = 42;
+    let p = ge_scalarmult_base(&scalar);
+    assert!(!p.has_small_order());
+
+    let points = small_order_points();
+    for (i, t) in points.iter().enumerate() {
+        let encoded = t.to_bytes();
+        assert!(points[..i].iter().all(|q| q.to_bytes() != encoded));
+        assert!(t.has_small_order());
+        assert!(GeP3::from_bytes_negate_vartime(&encoded)
+            .unwrap()
+            .has_small_order());
+        // A point with a small-order part isn't small-order itself.
+        assert!(!(p + *t).has_small_order());
+    }
+}

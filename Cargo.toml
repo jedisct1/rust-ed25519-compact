@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-compact"
-version = "2.5.0"
+version = "2.6.0"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
 description = "Ed25519 digital signatures and X25519 key exchange in pure Rust, with no_std and WebAssembly support"
