@@ -325,7 +325,7 @@ impl SigningState {
 
 impl SecretKey {
     /// Sign a multi-part message (streaming API).
-    /// It is critical for `noise` to never repeat.
+    /// It is critical to use a different value for `noise` for each message signed with a given key.
     pub fn sign_incremental(&self, noise: Noise) -> SigningState {
         let seed = &self[0..32];
         let pk = &self[32..64];
