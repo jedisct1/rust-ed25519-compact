@@ -12,7 +12,7 @@ pub enum Error {
     InvalidSecretKey,
     /// The signature is invalid.
     InvalidSignature,
-    /// The seed doesn't have the expected length.
+    /// The seed doesn't have the expected length, or is all zeros.
     InvalidSeed,
     /// The blind doesn't have the expected length.
     InvalidBlind,
@@ -35,7 +35,7 @@ impl Display for Error {
             Error::InvalidPublicKey => write!(f, "Invalid public key"),
             Error::InvalidSecretKey => write!(f, "Invalid secret key"),
             Error::InvalidSignature => write!(f, "Invalid signature"),
-            Error::InvalidSeed => write!(f, "Invalid seed length"),
+            Error::InvalidSeed => write!(f, "Invalid seed"),
             Error::InvalidBlind => write!(f, "Invalid blind length"),
             Error::InvalidNoise => write!(f, "Invalid noise length"),
             Error::ParseError => write!(f, "Parse error"),

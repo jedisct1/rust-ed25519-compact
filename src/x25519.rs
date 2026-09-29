@@ -316,6 +316,7 @@ mod from_ed25519 {
 #[allow(unused)]
 pub use from_ed25519::*;
 
+#[cfg(feature = "random")]
 #[test]
 fn test_x25519() {
     let sk_1 = SecretKey::from_slice(&[
@@ -366,7 +367,7 @@ fn test_x25519_rfc7748() {
     assert_eq!(shared_a, shared_b);
 }
 
-#[cfg(not(feature = "disable-signatures"))]
+#[cfg(all(not(feature = "disable-signatures"), feature = "random"))]
 #[test]
 fn test_x25519_map() {
     use super::KeyPair as EdKeyPair;

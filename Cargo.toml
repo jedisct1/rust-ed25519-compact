@@ -1,11 +1,11 @@
 [package]
 name = "ed25519-compact"
-version = "2.3.1"
+version = "2.6.0"
 authors = ["Frank Denis <github@pureftpd.org>"]
 edition = "2018"
-description = "A small, self-contained, wasm-friendly Ed25519 implementation"
+description = "Ed25519 digital signatures and X25519 key exchange in pure Rust, with no_std and WebAssembly support"
 readme = "README.md"
-keywords = ["crypto", "ed25519", "x25519", "eddsa", "signature"]
+keywords = ["ed25519", "x25519", "eddsa", "signature", "no-std"]
 repository = "https://github.com/jedisct1/rust-ed25519-compact"
 homepage = "https://github.com/jedisct1/rust-ed25519-compact"
 categories = ["algorithms", "cryptography", "no-std", "wasm"]
