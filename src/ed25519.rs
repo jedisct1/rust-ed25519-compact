@@ -305,7 +305,8 @@ impl Drop for SigningState {
 }
 
 impl SigningState {
-    fn new(nonce: [u8; 64], az: [u8; 64], pk_: &[u8]) -> Self {
+    fn new(mut nonce: [u8; 64], az: [u8; 64], pk_: &[u8]) -> Self {
+        sc_reduce(&mut nonce);
         let r = ge_scalarmult_base(&nonce[0..32]).to_bytes();
 
         let mut st = sha512::Hash::new();
@@ -389,9 +390,7 @@ impl SecretKey {
                 hasher.update(&az[32..64]);
             }
             hasher.update(message);
-            let mut hash_output = hasher.finalize();
-            sc_reduce(&mut hash_output[0..64]);
-            hash_output
+            hasher.finalize()
         };
         let mut st = SigningState::new(nonce, az, pk);
         st.absorb(message);
